@@ -1,0 +1,45 @@
+#!/usr/bin/env python3
+from __future__ import print_function
+from __future__ import absolute_import
+
+import argparse
+
+from zulint.linters import run_pyflakes
+from zulint.command import add_default_linter_arguments, LinterConfig
+
+
+def run():
+    # type: () -> None
+    parser = argparse.ArgumentParser()
+    # Add custom parser arguments here.
+
+    add_default_linter_arguments(parser)
+    args = parser.parse_args()
+
+    linter_config = LinterConfig(args)
+
+    # Linters will be run on these file types.
+    # eg: file_types = ['py', 'html', 'css', 'js']
+    file_types = ['py']
+
+    EXCLUDED_FILES = [
+        # No linters will be run on files in this list.
+        # eg: 'path/to/file.py'
+    ]
+    by_lang = linter_config.list_files(file_types, exclude=EXCLUDED_FILES)
+
+    @linter_config.lint
+    def pyflakes():
+        # type: () -> int
+        suppress_patterns = [
+            # Error patters in this list will be will not be reported by the linter.
+            # syntax: ('File Path', 'Error message')
+            # eg: ('path/to/file.py', 'imported but unused')
+        ]
+        failed = run_pyflakes(by_lang['py'], args, suppress_patterns)
+        return 1 if failed else 0
+
+    linter_config.do_lint()
+
+if __name__ == '__main__':
+    run()
