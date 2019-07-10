@@ -59,26 +59,29 @@ Once a project is setup with zulint, you'll have a top-level linter
 script with at least the following options:
 
 ```
-(zulip-py3-venv) tabbott@coset:~/zulip$ ./tools/lint --help
-usage: lint [-h] [--force] [--full] [--modified] [--verbose-timing]
-            [--skip SKIP] [--only ONLY] [--list] [--groups GROUPS]
-            [targets [targets ...]]
+$ ./example-lint --help
+usage: example-lint [-h] [--modified] [--verbose-timing] [--skip SKIP]
+                    [--only ONLY] [--list] [--list-groups] [--groups GROUPS]
+                    [--verbose] [--fix]
+                    [targets [targets ...]]
 
 positional arguments:
   targets               Specify directories to check
 
 optional arguments:
   -h, --help            show this help message and exit
-  --force               Run tests despite possible problems.
   --modified, -m        Only check modified files
   --verbose-timing, -vt
                         Print verbose timing output
   --skip SKIP           Specify linters to skip, eg: --skip=mypy,gitlint
   --only ONLY           Specify linters to run, eg: --only=mypy,gitlint
   --list, -l            List all the registered linters
+  --list-groups, -lg    List all the registered linter groups
   --groups GROUPS, -g GROUPS
                         Only run linter for languages in the group(s), e.g.:
-                        --groups=backend,other_group
+                        --groups=backend,frontend
+  --verbose, -v         Print verbose output where available
+  --fix                 Automatically fix problems where supported
 ```
 
 ### pre-commit hook mode
