@@ -38,7 +38,8 @@ def run_pyflakes(files, options, suppress_patterns=[]):
                                 stderr=subprocess.PIPE)
     assert pyflakes.stdout is not None  # Implied by use of subprocess.PIPE
 
-    def suppress_line(line: str) -> bool:
+    def suppress_line(line):
+        # type: (str) -> bool
         for file_pattern, line_pattern in suppress_patterns:
             if file_pattern in line and line_pattern in line:
                 return True
