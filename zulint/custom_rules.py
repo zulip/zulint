@@ -8,6 +8,7 @@ import traceback
 
 from zulint.printer import print_err, colors, GREEN, ENDC, MAGENTA, BLUE, YELLOW
 
+from typing import cast
 if False:
     from typing import Any, Dict, List, Optional, Tuple, Iterable
 
@@ -123,6 +124,7 @@ class RuleList:
 
     def print_error(self, rule, line, identifier, color, fn, line_number):
         # type: (Dict[str, Any], str, str, Optional[Iterable[str]], str, int) -> None
+        color = cast(str, color)
         print_err(identifier, color, '{} {}at {} line {}:'.format(
             YELLOW + rule['description'], BLUE, fn, line_number))
         print_err(identifier, color, line)

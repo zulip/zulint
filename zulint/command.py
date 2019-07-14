@@ -9,9 +9,9 @@ import os
 import subprocess
 import sys
 
+from typing import cast, Dict, List
 if False:
-    # See https://zulip.readthedocs.io/en/latest/testing/mypy.html#mypy-in-production-scripts
-    from typing import Callable, Dict, List, Optional
+    from typing import Callable, Optional
 
 from zulint.printer import print_err, colors, BOLDRED, BLUE, GREEN, ENDC
 from zulint import lister
@@ -98,9 +98,11 @@ class LinterConfig:
         else:
             file_types.extend({ft for group in groups.values() for ft in group})
 
-        self.by_lang = lister.list_files(self.args.targets, modified_only=self.args.modified,
-                                         ftypes=file_types, use_shebang=use_shebang,
-                                         group_by_ftype=group_by_ftype, exclude=exclude)
+
+        self.by_lang = cast(Dict[str, List[str]],
+                            lister.list_files(self.args.targets, modified_only=self.args.modified,
+                                        ftypes=file_types, use_shebang=use_shebang,
+                                        group_by_ftype=group_by_ftype, exclude=exclude))
         return self.by_lang
 
     def lint(self, func):
