@@ -8,9 +8,8 @@ import traceback
 
 from zulint.printer import print_err, colors, GREEN, ENDC, MAGENTA, BLUE, YELLOW
 
-from typing import cast
 if False:
-    from typing import Dict, List, Optional, Set, Tuple, Iterable
+    from typing import Dict, List, Optional, Set, Tuple
     from mypy_extensions import TypedDict
 
     Rule = TypedDict("Rule", {
@@ -83,7 +82,7 @@ class RuleList:
                                identifier,
                                color,
                                rule):
-        # type: (str, List[LineTup], str, Optional[Iterable[str]], Rule) -> bool
+        # type: (str, List[LineTup], str, str, Rule) -> bool
 
         '''
         DO NOT MODIFY THIS FUNCTION WITHOUT PROFILING.
@@ -135,8 +134,7 @@ class RuleList:
         return ok
 
     def print_error(self, rule, line, identifier, color, fn, line_number):
-        # type: (Rule, str, str, Optional[Iterable[str]], str, int) -> None
-        color = cast(str, color)
+        # type: (Rule, str, str, str, str, int) -> None
         print_err(identifier, color, '{} {}at {} line {}:'.format(
             YELLOW + rule['description'], BLUE, fn, line_number))
         print_err(identifier, color, line)
@@ -177,7 +175,7 @@ class RuleList:
                           identifier,
                           color,
                           max_length=None):
-        # type: (str, str, Optional[Iterable[str]], Optional[int]) -> bool
+        # type: (str, str, str, Optional[int]) -> bool
         failed = False
 
         line_tups = self.get_line_info_from_file(fn=fn)
