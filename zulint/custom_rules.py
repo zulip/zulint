@@ -10,9 +10,21 @@ from zulint.printer import print_err, colors, GREEN, ENDC, MAGENTA, BLUE, YELLOW
 
 from typing import cast
 if False:
-    from typing import Any, Dict, List, Optional, Tuple, Iterable
+    from typing import Dict, List, Optional, Set, Tuple, Iterable
+    from mypy_extensions import TypedDict
 
-    Rule = List[Dict[str, Any]]
+    Rule = TypedDict("Rule", {
+        "bad_lines": List[str],
+        "description": str,
+        "exclude": Set[str],
+        "exclude_line": Set[Tuple[str, str]],
+        "exclude_pattern": str,
+        "good_lines": List[str],
+        "include_only": Set[str],
+        "pattern": str,
+        "strip": str,
+        "strip_rule": str,
+    }, total=False)
     LineTup = Tuple[int, str, str, str]
 
 
@@ -21,7 +33,7 @@ class RuleList:
 
     def __init__(self, langs, rules, max_length=None, length_exclude=[], shebang_rules=[],
                  exclude_files_in=None):
-        # type: (List[str], Rule, Optional[int], List[str], Rule, Optional[str]) -> None
+        # type: (List[str], List[Rule], Optional[int], List[str], List[Rule], Optional[str]) -> None
         self.langs = langs
         self.rules = rules
         self.max_length = max_length
@@ -44,7 +56,7 @@ class RuleList:
         return line_tups
 
     def get_rules_applying_to_fn(self, fn, rules):
-        # type: (str, Rule) -> Rule
+        # type: (str, List[Rule]) -> List[Rule]
         rules_to_apply = []
         for rule in rules:
             excluded = False
@@ -71,7 +83,7 @@ class RuleList:
                                identifier,
                                color,
                                rule):
-        # type: (str, List[LineTup], str, Optional[Iterable[str]], Dict[str, Any]) -> bool
+        # type: (str, List[LineTup], str, Optional[Iterable[str]], Rule) -> bool
 
         '''
         DO NOT MODIFY THIS FUNCTION WITHOUT PROFILING.
@@ -123,7 +135,7 @@ class RuleList:
         return ok
 
     def print_error(self, rule, line, identifier, color, fn, line_number):
-        # type: (Dict[str, Any], str, str, Optional[Iterable[str]], str, int) -> None
+        # type: (Rule, str, str, Optional[Iterable[str]], str, int) -> None
         color = cast(str, color)
         print_err(identifier, color, '{} {}at {} line {}:'.format(
             YELLOW + rule['description'], BLUE, fn, line_number))

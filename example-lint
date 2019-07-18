@@ -8,11 +8,8 @@ from zulint.linters import run_pyflakes
 from zulint.command import add_default_linter_arguments, LinterConfig
 from zulint.custom_rules import RuleList
 
-from typing import cast, List, Dict, Any
 if False:
-    from typing import Tuple
-
-Rule = List[Dict[str, Any]]
+    from typing import List, Tuple
 
 def run():
     # type: () -> None
@@ -43,11 +40,11 @@ def run():
         """Check trailing whitespace for specified files"""
         trailing_whitespace_rule = RuleList(
             langs=file_types,
-            rules=cast(Rule, [{
+            rules=[{
                 'pattern': r'\s+$',
                 'strip': '\n',
                 'description': 'Fix trailing whitespace'
-            }])
+            }]
         )
         failed = trailing_whitespace_rule.check(by_lang, verbose=args.verbose)
         return 1 if failed else 0
