@@ -12,7 +12,6 @@ from six.moves import filter
 
 MYPY = False
 if MYPY:
-    # See https://zulip.readthedocs.io/en/latest/testing/mypy.html#mypy-in-production-scripts
     from typing import Union, List, Dict
 
 def get_ftype(fpath, use_shebang):

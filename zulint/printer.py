@@ -6,7 +6,6 @@ from itertools import cycle
 
 MYPY = False
 if MYPY:
-    # See https://zulip.readthedocs.io/en/latest/testing/mypy.html#mypy-in-production-scripts
     from typing import Union, Text
 
 # Terminal Color codes for use in differentiatng linters

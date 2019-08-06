@@ -6,7 +6,6 @@ import subprocess
 
 MYPY = False
 if MYPY:
-    # See https://zulip.readthedocs.io/en/latest/testing/mypy.html#mypy-in-production-scripts
     from typing import List, Tuple
 
 from zulint.printer import print_err, colors
