@@ -11,7 +11,7 @@ import sys
 
 from typing import cast, Dict, List
 if False:
-    from typing import Callable, Optional
+    from typing import Callable, Optional, NoReturn
 
 from zulint.printer import print_err, colors, BOLDRED, BLUE, GREEN, ENDC
 from zulint import lister
@@ -165,7 +165,7 @@ class LinterConfig:
             logger.setLevel(logging.WARNING)
 
     def do_lint(self):
-        # type: () -> None
+        # type: () -> NoReturn
         assert not self.args.only or not self.args.skip, "Only one of --only or --skip can be used at once."
         if self.args.only:
             self.lint_functions = {linter: self.lint_functions[linter] for linter in self.args.only}
