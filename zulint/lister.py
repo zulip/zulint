@@ -10,7 +10,8 @@ from collections import defaultdict
 import argparse
 from six.moves import filter
 
-if False:
+MYPY = False
+if MYPY:
     # See https://zulip.readthedocs.io/en/latest/testing/mypy.html#mypy-in-production-scripts
     from typing import Union, List, Dict
 

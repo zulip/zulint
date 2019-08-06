@@ -8,7 +8,8 @@ import traceback
 
 from zulint.printer import print_err, colors, GREEN, ENDC, MAGENTA, BLUE, YELLOW
 
-if False:
+MYPY = False
+if MYPY:
     from typing import Dict, List, Optional, Set, Tuple
     from mypy_extensions import TypedDict
 

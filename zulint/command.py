@@ -10,7 +10,9 @@ import subprocess
 import sys
 
 from typing import cast, Dict, List
-if False:
+
+MYPY = False
+if MYPY:
     from typing import Callable, Optional, NoReturn
 
 from zulint.printer import print_err, colors, BOLDRED, BLUE, GREEN, ENDC
