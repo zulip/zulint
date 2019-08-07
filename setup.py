@@ -27,6 +27,9 @@ setup(
     python_requires='>=2.7.0',
     url='https://github.com/zulip/zulint',
     packages=find_packages(exclude=('tests',)),
+    package_data={
+        'zulint': ["py.typed"],
+    },
     install_requires=REQUIRED,
     license='Apache License 2.0',
     classifiers=[
