@@ -9,10 +9,12 @@ import re
 from collections import defaultdict
 import argparse
 from six.moves import filter
+from typing import overload
 
 MYPY = False
 if MYPY:
     from typing import Union, List, Dict
+    from typing_extensions import Literal
 
 def get_ftype(fpath, use_shebang):
     # type: (str, bool) -> str
@@ -43,10 +45,24 @@ def get_ftype(fpath, use_shebang):
     else:
         return ''
 
-def list_files(targets=[], ftypes=[], use_shebang=True,
-               modified_only=False, exclude=[], group_by_ftype=False,
+@overload
+def list_files(group_by_ftype=False, targets=[], ftypes=[], use_shebang=True,
+               modified_only=False, exclude=[],
                extless_only=False):
-    # type: (List[str], List[str], bool, bool, List[str], bool, bool) -> Union[Dict[str, List[str]], List[str]]
+    # type: (Literal[False], List[str], List[str], bool, bool, List[str], bool) -> List[str]
+    ...
+
+@overload
+def list_files(group_by_ftype, targets=[], ftypes=[], use_shebang=True,
+               modified_only=False, exclude=[],
+               extless_only=False):
+    # type: (Literal[True], List[str], List[str], bool, bool, List[str], bool) -> Dict[str, List[str]]
+    ...
+
+def list_files(group_by_ftype=False, targets=[], ftypes=[], use_shebang=True,
+               modified_only=False, exclude=[],
+               extless_only=False):
+    # type: (bool, List[str], List[str], bool, bool, List[str], bool) -> Union[Dict[str, List[str]], List[str]]
     """
     List files tracked by git.
 

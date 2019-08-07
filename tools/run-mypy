@@ -6,7 +6,7 @@ import argparse
 import subprocess
 
 from zulint import lister
-from typing import cast, Dict, List
+from typing import List
 
 EXCLUDE_FILES = []  # type: List[str]
 
@@ -57,13 +57,13 @@ parser.add_argument('--quick', action='store_true', default=False,
 
 args = parser.parse_args()
 
-files_dict = cast(Dict[str, List[str]],
-                  lister.list_files(targets=args.targets, ftypes=['py'],
-                                    use_shebang=True,
-                                    modified_only=args.modified,
-                                    group_by_ftype=True,
-                                    exclude=EXCLUDE_FILES,
-                                    ))
+files_dict = lister.list_files(
+    targets=args.targets, ftypes=['py'],
+    use_shebang=True,
+    modified_only=args.modified,
+    group_by_ftype=True,
+    exclude=EXCLUDE_FILES,
+)
 
 
 pyi_files = set(files_dict['pyi'])
