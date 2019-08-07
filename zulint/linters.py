@@ -36,7 +36,8 @@ def run_pyflakes(files, options, suppress_patterns=[]):
     color = next(colors)
     pyflakes = subprocess.Popen(['pyflakes'] + files,
                                 stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE)
+                                stderr=subprocess.PIPE,
+                                universal_newlines=True)
     assert pyflakes.stdout is not None  # Implied by use of subprocess.PIPE
 
     def suppress_line(line):
