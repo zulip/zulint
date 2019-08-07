@@ -11,7 +11,7 @@ from zulint.printer import print_err, colors, GREEN, ENDC, MAGENTA, BLUE, YELLOW
 MYPY = False
 if MYPY:
     from typing import Dict, List, Optional, Set, Tuple
-    from mypy_extensions import TypedDict
+    from typing_extensions import TypedDict
 
     Rule = TypedDict("Rule", {
         "bad_lines": List[str],
