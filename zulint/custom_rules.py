@@ -31,9 +31,9 @@ if MYPY:
 class RuleList:
     """Defines and runs custom linting rules for the specified language."""
 
-    def __init__(self, langs, rules, max_length=None, length_exclude=[], shebang_rules=[],
+    def __init__(self, langs, rules, max_length=None, length_exclude=set(), shebang_rules=[],
                  exclude_files_in=None):
-        # type: (List[str], List[Rule], Optional[int], List[str], List[Rule], Optional[str]) -> None
+        # type: (List[str], List[Rule], Optional[int], Set[str], List[Rule], Optional[str]) -> None
         self.langs = langs
         self.rules = rules
         self.max_length = max_length
