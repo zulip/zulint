@@ -7,7 +7,7 @@ REQUIRED = [
     'six',
     'pyflakes',
     'pycodestyle',
-    'typing',
+    'typing;python_version<"3.5"',
     'typing-extensions',
 ]
 
