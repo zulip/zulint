@@ -9,6 +9,7 @@ REQUIRED = [
     'pycodestyle',
     'typing;python_version<"3.5"',
     'typing-extensions',
+    'mypy==0.761'
 ]
 
 def long_description():
