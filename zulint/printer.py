@@ -27,12 +27,12 @@ def print_err(name, color, line):
     if sys.version_info[0] == 3 and isinstance(line, bytes):
         line = line.decode('utf-8')
 
-    print('{}{}{}|{end} {}{!s}{end}'.format(
-        color,
-        name,
-        ' ' * max(0, 10 - len(name)),
-        BOLDRED,
-        line.rstrip(),
+    print('{color}{name}{pad}|{end} {red_color}{line!s}{end}'.format(
+        color=color,
+        name=name,
+        pad=' ' * max(0, 10 - len(name)),
+        red_color=BOLDRED,
+        line=line.rstrip(),
         end=ENDC)
     )
 
