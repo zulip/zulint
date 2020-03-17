@@ -32,8 +32,8 @@ class RuleList:
     """Defines and runs custom linting rules for the specified language."""
 
     def __init__(self, langs, rules, max_length=None, length_exclude=set(), shebang_rules=[],
-                 exclude_files_in=None):
-        # type: (List[str], List[Rule], Optional[int], Set[str], List[Rule], Optional[str]) -> None
+                 exclude_files_in=None, exclude_max_length_fns=[], exclude_max_length_line_patterns=[]):
+        # type: (List[str], List[Rule], Optional[int], Set[str], List[Rule], Optional[str], List[str], List[str]) -> None
         self.langs = langs
         self.rules = rules
         self.max_length = max_length
@@ -42,6 +42,11 @@ class RuleList:
         # Exclude the files in this folder from rules
         self.exclude_files_in = "\\"
         self.verbose = False
+
+        # Exclude some file names and line patterns from max line length
+        # These defaults are from https://github.com/zulip/zulip repository.
+        self.exclude_max_length_fns = exclude_max_length_fns
+        self.exclude_max_length_line_patterns = exclude_max_length_line_patterns
 
     def get_line_info_from_file(self, fn):
         # type: (str) -> List[LineTup]
@@ -160,13 +165,8 @@ class RuleList:
             else:
                 line_length = len(line)
             if (line_length > max_length and
-                '# type' not in line and 'test' not in fn and 'example' not in fn and
-                # Don't throw errors for markdown format URLs
-                not re.search(r"^\[[ A-Za-z0-9_:,&()-]*\]: http.*", line) and
-                # Don't throw errors for URLs in code comments
-                not re.search(r"[#].*http.*", line) and
-                not re.search(r"`\{\{ api_url \}\}[^`]+`", line) and
-                    "# ignorelongline" not in line and 'migrations' not in fn):
+                not re.findall(r'|'.join(self.exclude_max_length_fns), fn) and
+                not re.findall(r'|'.join(self.exclude_max_length_line_patterns), line)):
                 print("Line too long (%s) at %s line %s: %s" % (len(line), fn, i+1, line_newline_stripped))
                 ok = False
         return ok
