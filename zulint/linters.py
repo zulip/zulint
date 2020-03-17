@@ -38,7 +38,10 @@ def run_pyflakes(files, options, suppress_patterns=[]):
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE,
                                 universal_newlines=True)
-    assert pyflakes.stdout is not None  # Implied by use of subprocess.PIPE
+
+    # Implied by use of subprocess.PIPE
+    assert pyflakes.stdout is not None
+    assert pyflakes.stderr is not None
 
     def suppress_line(line):
         # type: (str) -> bool
