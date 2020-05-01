@@ -86,6 +86,48 @@ optional arguments:
   --fix                 Automatically fix problems where supported
 ```
 
+
+**Example Output**
+
+```
+❯ ./tools/lint
+js        | Use channel module for AJAX calls at static/js/channel.js line 81:
+js        |                 const jqXHR = $.ajax(args);
+py        | avoid subject as a var at zerver/lib/email_mirror.py line 321:
+py        |     # strips RE and FWD from the subject
+py        | Please use access_message() to fetch Message objects at zerver/worker/queue_processors.py line 579:
+py        |         message = Message.objects.get(id=event['message_id'])
+py        | avoid subject as a var at zerver/lib/email_mirror.py line 327:
+py        | Use do_change_is_admin function rather than setting UserProfile's is_realm_admin attribute directly. at file.py line 28:
+py        |             user.is_realm_admin = True
+puppet    | /usr/lib/ruby/vendor_ruby/puppet/util.rb:461: warning: URI.escape is obsolete
+hbs       | Avoid using the `style=` attribute; we prefer styling in CSS files at static/templates/group_pms.hbs line 6:
+hbs       |         <span class="user_circle_fraction" style="background:hsla(106, 74%, 44%, {{fraction_present}});"></span>
+pep8      | tools/linter_lib/custom_check.py:499:13: E121 continuation line under-indented for hanging indent
+pep8      | tools/linter_lib/custom_check.py:500:14: E131 continuation line unaligned for hanging indent
+```
+
+To display `good_lines` and `bad_lines` along with errors, use `--verbose` option.
+
+```
+❯ ./tools/lint --verbose
+py        | Always pass update_fields when saving user_profile objects at zerver/lib/actions.py line 3160:
+py        |     user_profile.save()  # Can't use update_fields because of how the foreign key works.
+py        |   Good code: user_profile.save(update_fields=["pointer"])
+py        |   Bad code:  user_profile.save()
+py        |
+py        | Missing whitespace after ":" at zerver/tests/test_push_notifications.py line 535:
+py        |             'realm_counts': '[{"id":1,"property":"invites_sent::day","subgroup":null,"end_time":574300800.0,"value":5,"realm":2}]',
+py        |   Good code: "foo": bar | "some:string:with:colons"
+py        |   Bad code:  "foo":bar  | "foo":1
+py        |
+js        | avoid subject in JS code at static/js/util.js line 279:
+js        |         message.topic = message.subject;
+js        |   Good code: topic_name
+js        |   Bad code:  subject="foo" |  MAX_SUBJECT_LEN
+js        |
+```
+
 ### pre-commit hook mode
 
 See https://github.com/zulip/zulip/blob/master/tools/pre-commit for an
@@ -95,17 +137,168 @@ run the hook from outside Vagrant).
 
 ## Adding zulint to a codebase
 
-TODO.  Will roughly include `pip install zulint`, copying an example
-`lint` script, and adding your rules.
+TODO: Make a pypi release
 
+Add `zulint` to your codebase requirements file or just do:
+
+```
+pip install zulint
+```
+
+We recommend starting by copying [example-lint](./example-lint) into
+your codebase and configuring it.  For a more advanced example, you
+can look at [Zulip's
+linter](https://github.com/zulip/zulip/blob/master/tools/lint).
+
+```bash
+cp -a example-lint /path/to/project/bin/lint
+chmod +x /path/to/project/bin/lint
+git add /path/to/project/bin//lint
+```
 
 ## Adding third-party linters
 
-TODO: Document the linter_config API.
+First import the `LinterConfig` and initialize it with default arguments.
+You can then use the `external_linter` method to register the linter.
+
+eg:
+
+```python
+
+linter_config.external_linter('eslint', ['node', 'node_modules/.bin/eslint',
+                                          '--quiet', '--cache', '--ext', '.js,.ts'], ['js', 'ts'],
+                              fix_arg='--fix',
+                              description="Standard JavaScript style and formatting linter"
+                              "(config: .eslintrc).")
+```
+
+The `external_linter` method takes the following arguments:
+
+* name: Name of the linter. It will be printer before the failed code to show
+        which linter is failing. | `REQUIRED`
+* command: The terminal command to execute your linter in "shell-like syntax".
+           You can use `shlex.split("SHELL COMMAND TO RUN LINTER")` to split your
+           command. | `REQUIRED`
+* target_langs: The language files this linter should run on. Leave this argument
+                empty (= `[]`) to run on all the files. | `RECOMMENDED`
+* pass_targets: Pass target files (aka files in the specified `target_langs`) to
+                the linter command when executing it. Default: `True` | `OPTIONAL`
+* fix_arg: Some linters support fixing the errors automatically. Set it to the flag
+           used by the linter to fix the errors. | `OPTIONAL`
+* description: The description of your linter to be printed with `--list` argument. | `RECOMMENDED`
+
+eg:
+
+```
+❯ ./tools/lint --list
+Linter          Description
+css             Standard CSS style and formatting linter (config: .stylelintrc)
+eslint          Standard JavaScript style and formatting linter(config: .eslintrc).
+puppet          Runs the puppet parser validator, checking for syntax errors.
+puppet-lint     Standard puppet linter(config: tools/linter_lib/exclude.py)
+templates       Custom linter checks whitespace formattingof HTML templates.
+openapi         Validates our OpenAPI/Swagger API documentation(zerver/openapi/zulip.yaml)
+shellcheck      Standard shell script linter.
+mypy            Static type checker for Python (config: mypy.ini)
+tsc             TypeScript compiler (config: tsconfig.json)
+yarn-deduplicate Shares duplicate packages in yarn.lock
+gitlint         Checks commit messages for common formatting errors.(config: .gitlint)
+semgrep-py      Syntactic Grep (semgrep) Code Search Tool (config: ./tools/semgrep.yml)
+custom_py       Runs custom checks for python files (config: tools/linter_lib/custom_check.py)
+custom_nonpy    Runs custom checks for non-python files (config: tools/linter_lib/custom_check.py)
+pyflakes        Standard Python bug and code smell linter (config: tools/linter_lib/pyflakes.py)
+pep8_1of2       Standard Python style linter on 50% of files (config: tools/linter_lib/pep8.py)
+pep8_2of2       Standard Python style linter on other 50% of files (config: tools/linter_lib/pep8.py)
+```
+
+Please make sure external linter (here `eslint`) is accessible via bash or in the
+virtual env where this linter will run.
 
 ## Writing custom rules
 
-TODO: Document all the features of the `RuleList` and `custom_check` system.
+You can write your own custom rules for any language using regular expression
+in zulint. Doing it is very simple and there are tons of examples available
+in [Zulip's custom_check.py file](https://github.com/zulip/zulip/blob/master/tools/linter_lib/custom_check.py).
+
+In the [above example](#adding-third-party-linters) you can add custom rules via `@linter_config.lint` decorator.
+For eg:
+
+```python
+
+from zulint.custom_rules import RuleList
+
+@linter_config.lint
+def check_custom_rules():
+    # type: () -> int
+    """Check trailing whitespace for specified files"""
+    trailing_whitespace_rule = RuleList(
+        langs=file_types,
+        rules=[{
+            'pattern': r'\s+$',
+            'strip': '\n',
+            'description': 'Fix trailing whitespace'
+        }]
+    )
+    failed = trailing_whitespace_rule.check(by_lang, verbose=args.verbose)
+    return 1 if failed else 0
+```
+
+#### RuleList
+A new custom rule is defined via the `RuleList` class. `RuleList` takes the following arguments:
+
+```python
+langs                             # The languages this rule will run on. eg: ['py', 'bash']
+rules                             # List of custom `Rule`s to run. See definition of Rule below for more details.
+max_length                        # Set a max length value for each line in the files. eg: 79
+length_exclude                    # List of files to exclude from `max_length` limit. eg: ["README"]
+shebang_rules                     # List of shebang `Rule`s to run in `langs`. Default: []
+exclude_files_in                  # Directory to exclude from all rules. eg: 'app/' Default: None
+exclude_max_length_fns            # List of file names to exclude from max_length limit. eg: [test, example] Defautl: []
+exclude_max_length_line_patterns  # List of line patterns to exclude from max_length limit. eg: ["`\{\{ api_url \}\}[^`]+`"]
+```
+
+#### Rule
+A rule is a python dictionary containing regular expression,
+which will be run on each line in the `langs`' files specified in the `RuleList`.
+It has a lot of additional features which you can use to run the pattern in
+specific areas of your codebase.
+
+Find below all the keys that a `Rule` can have along with the
+type of inputs they take.
+
+```python
+Rule = TypedDict("Rule", {
+    "bad_lines": List[str],
+    "description": str,
+    "exclude": Set[str],
+    "exclude_line": Set[Tuple[str, str]],
+    "exclude_pattern": str,
+    "good_lines": List[str],
+    "include_only": Set[str],
+    "pattern": str,
+    "strip": str,
+    "strip_rule": str,
+}, total=False)
+```
+
+* `pattern` is your regular expression to be run on all the eligible lines (i.e. lines which haven't been excluded by you).
+* `description` is the message that will be displayed if a pattern match is found.
+* `good_lines` are the list of sample lines which shouldn't match the pattern.
+* `bad_lines` are like `good_lines` but they match the pattern.
+
+**NOTE**: `patten` is run on `bad_lines` and `good_lines` and you can use them as an example to tell the developer
+      what is wrong with their code and how to fix it.
+
+* `exclude` List of folders to exclude.
+* `exclude_line` Tuple of filename and pattern to exclude from pattern check.
+eg:
+
+```python
+('zerver/lib/actions.py', "user_profile.save()  # Can't use update_fields because of how the foreign key works.")`
+```
+
+* `exclude_pattern`: pattern to exclude from the matching patterns.
+* `include_only`: `pattern` is only run on these files.
 
 ## Development Setup
 
@@ -114,5 +307,5 @@ Run the following commands in a terminal to install zulint.
 git clone git@github.com:zulip/zulint.git
 python3 -m venv zulint_env
 source zulint_env/bin/activate
-python3 setup.py install
+pip install -e .
 ```
