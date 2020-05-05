@@ -1,14 +1,11 @@
 #!/usr/bin/env python3
 
 import argparse
+from typing import List, Tuple
 
 from zulint.linters import run_pyflakes
 from zulint.command import add_default_linter_arguments, LinterConfig
 from zulint.custom_rules import RuleList
-
-MYPY = False
-if MYPY:
-    from typing import List, Tuple
 
 def run():
     # type: () -> None

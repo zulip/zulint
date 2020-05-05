@@ -3,10 +3,7 @@ import logging
 import os
 import subprocess
 import sys
-
-MYPY = False
-if MYPY:
-    from typing import Callable, Dict, List, Optional, NoReturn
+from typing import Callable, Dict, List, Optional, NoReturn
 
 from zulint.printer import print_err, colors, BOLDRED, BLUE, GREEN, ENDC
 from zulint import lister

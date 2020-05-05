@@ -1,26 +1,23 @@
 import re
 import traceback
+from typing import Dict, List, Optional, Set, Tuple
+from typing_extensions import TypedDict
 
 from zulint.printer import print_err, colors, GREEN, ENDC, MAGENTA, BLUE, YELLOW
 
-MYPY = False
-if MYPY:
-    from typing import Dict, List, Optional, Set, Tuple
-    from typing_extensions import TypedDict
-
-    Rule = TypedDict("Rule", {
-        "bad_lines": List[str],
-        "description": str,
-        "exclude": Set[str],
-        "exclude_line": Set[Tuple[str, str]],
-        "exclude_pattern": str,
-        "good_lines": List[str],
-        "include_only": Set[str],
-        "pattern": str,
-        "strip": str,
-        "strip_rule": str,
-    }, total=False)
-    LineTup = Tuple[int, str, str, str]
+Rule = TypedDict("Rule", {
+    "bad_lines": List[str],
+    "description": str,
+    "exclude": Set[str],
+    "exclude_line": Set[Tuple[str, str]],
+    "exclude_pattern": str,
+    "good_lines": List[str],
+    "include_only": Set[str],
+    "pattern": str,
+    "strip": str,
+    "strip_rule": str,
+}, total=False)
+LineTup = Tuple[int, str, str, str]
 
 
 class RuleList:

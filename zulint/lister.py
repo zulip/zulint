@@ -6,12 +6,8 @@ import subprocess
 import re
 from collections import defaultdict
 import argparse
-from typing import overload
-
-MYPY = False
-if MYPY:
-    from typing import Union, List, Dict
-    from typing_extensions import Literal
+from typing import Union, List, Dict, overload
+from typing_extensions import Literal
 
 def get_ftype(fpath, use_shebang):
     # type: (str, bool) -> str

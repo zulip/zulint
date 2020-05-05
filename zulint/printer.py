@@ -1,9 +1,6 @@
 import sys
 from itertools import cycle
-
-MYPY = False
-if MYPY:
-    from typing import Union, Text
+from typing import Union, Text
 
 # Terminal Color codes for use in differentiatng linters
 BOLDRED = '\x1B[1;31m'
