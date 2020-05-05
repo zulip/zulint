@@ -13,8 +13,7 @@ ENDC = '\033[0m'
 
 colors = cycle([GREEN, YELLOW, BLUE, MAGENTA, CYAN])
 
-def print_err(name, color, line):
-    # type: (str, str, Union[Text, bytes]) -> None
+def print_err(name: str, color: str, line: Union[Text, bytes]) -> None:
 
     # Decode with UTF-8 if in Python 3 and `line` is of bytes type.
     # (Python 2 does this automatically)

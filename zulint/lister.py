@@ -9,8 +9,7 @@ import argparse
 from typing import Union, List, Dict, overload
 from typing_extensions import Literal
 
-def get_ftype(fpath, use_shebang):
-    # type: (str, bool) -> str
+def get_ftype(fpath: str, use_shebang: bool) -> str:
     ext = os.path.splitext(fpath)[1]
     if ext:
         return ext[1:]
@@ -39,23 +38,37 @@ def get_ftype(fpath, use_shebang):
         return ''
 
 @overload
-def list_files(group_by_ftype=False, targets=[], ftypes=[], use_shebang=True,
-               modified_only=False, exclude=[],
-               extless_only=False):
-    # type: (Literal[False], List[str], List[str], bool, bool, List[str], bool) -> List[str]
+def list_files(
+    group_by_ftype: Literal[False] = False,
+    targets: List[str] = [],
+    ftypes: List[str] = [],
+    use_shebang: bool = True,
+    modified_only: bool = False,
+    exclude: List[str] = [],
+    extless_only: bool = False,
+) -> List[str]:
     ...
 
 @overload
-def list_files(group_by_ftype, targets=[], ftypes=[], use_shebang=True,
-               modified_only=False, exclude=[],
-               extless_only=False):
-    # type: (Literal[True], List[str], List[str], bool, bool, List[str], bool) -> Dict[str, List[str]]
+def list_files(
+    group_by_ftype: Literal[True],
+    targets: List[str] = [],
+    ftypes: List[str] = [],
+    use_shebang: bool = True,
+    modified_only: bool = False, exclude: List[str] = [],
+    extless_only: bool = False,
+) -> Dict[str, List[str]]:
     ...
 
-def list_files(group_by_ftype=False, targets=[], ftypes=[], use_shebang=True,
-               modified_only=False, exclude=[],
-               extless_only=False):
-    # type: (bool, List[str], List[str], bool, bool, List[str], bool) -> Union[Dict[str, List[str]], List[str]]
+def list_files(
+    group_by_ftype: bool = False,
+    targets: List[str] = [],
+    ftypes: List[str] = [],
+    use_shebang: bool = True,
+    modified_only: bool = False,
+    exclude: List[str] = [],
+    extless_only: bool = False,
+) -> Union[Dict[str, List[str]], List[str]]:
     """
     List files tracked by git.
 
