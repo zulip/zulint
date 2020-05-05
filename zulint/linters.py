@@ -5,8 +5,7 @@ from typing import List, Tuple
 from zulint.printer import print_err, colors
 
 
-def run_pycodestyle(files, ignored_rules):
-    # type: (List[str], List[str]) -> bool
+def run_pycodestyle(files: List[str], ignored_rules: List[str]) -> bool:
     if len(files) == 0:
         return False
 
@@ -22,8 +21,11 @@ def run_pycodestyle(files, ignored_rules):
     return failed
 
 
-def run_pyflakes(files, options, suppress_patterns=[]):
-    # type: (List[str], argparse.Namespace, List[Tuple[str, str]]) -> bool
+def run_pyflakes(
+    files: List[str],
+    options: argparse.Namespace,
+    suppress_patterns: List[Tuple[str, str]] = [],
+) -> bool:
     if len(files) == 0:
         return False
     failed = False
@@ -37,8 +39,7 @@ def run_pyflakes(files, options, suppress_patterns=[]):
     assert pyflakes.stdout is not None
     assert pyflakes.stderr is not None
 
-    def suppress_line(line):
-        # type: (str) -> bool
+    def suppress_line(line: str) -> bool:
         for file_pattern, line_pattern in suppress_patterns:
             if file_pattern in line and line_pattern in line:
                 return True

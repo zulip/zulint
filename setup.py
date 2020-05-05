@@ -8,8 +8,7 @@ REQUIRED = [
     'typing-extensions',
 ]
 
-def long_description():
-    # type: () -> str
+def long_description() -> str:
     with open('README.md', encoding='utf8') as f:
         return f.read()
 

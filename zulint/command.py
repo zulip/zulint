@@ -8,8 +8,7 @@ from typing import Callable, Dict, List, Optional, NoReturn
 from zulint.printer import print_err, colors, BOLDRED, BLUE, GREEN, ENDC
 from zulint import lister
 
-def add_default_linter_arguments(parser):
-    # type: (argparse.ArgumentParser) -> None
+def add_default_linter_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument('--modified', '-m',
                         action='store_true',
                         help='Only check modified files')
@@ -45,12 +44,10 @@ def add_default_linter_arguments(parser):
                         action='store_true',
                         help='Automatically fix problems where supported')
 
-def split_arg_into_list(arg):
-    # type: (str) -> List[str]
+def split_arg_into_list(arg: str) -> List[str]:
     return [linter for linter in arg.split(',')]
 
-def run_parallel(lint_functions):
-    # type: (Dict[str, Callable[[], int]]) -> bool
+def run_parallel(lint_functions: Dict[str, Callable[[], int]]) -> bool:
     pids = []
     for name, func in lint_functions.items():
         pid = os.fork()
@@ -74,14 +71,18 @@ class LinterConfig:
     lint_functions = {}  # type: Dict[str, Callable[[], int]]
     lint_descriptions = {}  # type: Dict[str, str]
 
-    def __init__(self, args):
-        # type: (argparse.Namespace) -> None
+    def __init__(self, args: argparse.Namespace) -> None:
         self.args = args
         self.by_lang = {}  # type: Dict[str, List[str]]
         self.groups = {}  # type: Dict[str, List[str]]
 
-    def list_files(self, file_types=[], groups={}, use_shebang=True, exclude=[]):
-        # type: (List[str], Dict[str, List[str]], bool, List[str]) -> Dict[str, List[str]]
+    def list_files(
+        self,
+        file_types: List[str] = [],
+        groups: Dict[str, List[str]] = {},
+        use_shebang: bool = True,
+        exclude: List[str] = [],
+    ) -> Dict[str, List[str]]:
         assert file_types or groups, "Atleast one of `file_types` or `groups` must be specified."
 
         self.groups = groups
@@ -97,15 +98,20 @@ class LinterConfig:
         )
         return self.by_lang
 
-    def lint(self, func):
-        # type: (Callable[[], int]) -> Callable[[], int]
+    def lint(self, func: Callable[[], int]) -> Callable[[], int]:
         self.lint_functions[func.__name__] = func
         self.lint_descriptions[func.__name__] = func.__doc__ if func.__doc__ else "External Linter"
         return func
 
-    def external_linter(self, name, command, target_langs=[], pass_targets=True, fix_arg=None,
-                        description="External Linter"):
-        # type: (str, List[str], List[str], bool, Optional[str], str) -> None
+    def external_linter(
+        self,
+        name: str,
+        command: List[str],
+        target_langs: List[str] = [],
+        pass_targets: bool = True,
+        fix_arg: Optional[str] = None,
+        description: str = "External Linter",
+    ) -> None:
         """Registers an external linter program to be run as part of the
         linter.  This program will be passed the subset of files being
         linted that have extensions in target_langs.  If there are no
@@ -116,8 +122,7 @@ class LinterConfig:
         self.lint_descriptions[name] = description
         color = next(colors)
 
-        def run_linter():
-            # type: () -> int
+        def run_linter() -> int:
             targets = []  # type: List[str]
             if len(target_langs) != 0:
                 targets = [target for lang in target_langs for target in self.by_lang[lang]]
@@ -147,8 +152,7 @@ class LinterConfig:
 
         self.lint_functions[name] = run_linter
 
-    def set_logger(self):
-        # type: () -> None
+    def set_logger(self) -> None:
         logging.basicConfig(format="%(asctime)s %(message)s")
         logger = logging.getLogger()
         if self.args.verbose_timing:
@@ -156,8 +160,7 @@ class LinterConfig:
         else:
             logger.setLevel(logging.WARNING)
 
-    def do_lint(self):
-        # type: () -> NoReturn
+    def do_lint(self) -> NoReturn:
         assert not self.args.only or not self.args.skip, "Only one of --only or --skip can be used at once."
         if self.args.only:
             self.lint_functions = {linter: self.lint_functions[linter] for linter in self.args.only}

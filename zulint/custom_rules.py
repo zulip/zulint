@@ -23,9 +23,17 @@ LineTup = Tuple[int, str, str, str]
 class RuleList:
     """Defines and runs custom linting rules for the specified language."""
 
-    def __init__(self, langs, rules, max_length=None, length_exclude=set(), shebang_rules=[],
-                 exclude_files_in=None, exclude_max_length_fns=[], exclude_max_length_line_patterns=[]):
-        # type: (List[str], List[Rule], Optional[int], Set[str], List[Rule], Optional[str], List[str], List[str]) -> None
+    def __init__(
+        self,
+        langs: List[str],
+        rules: List[Rule],
+        max_length: Optional[int] = None,
+        length_exclude: Set[str] = set(),
+        shebang_rules: List[Rule] = [],
+        exclude_files_in: Optional[str] = None,
+        exclude_max_length_fns: List[str] = [],
+        exclude_max_length_line_patterns: List[str] = [],
+    ) -> None:
         self.langs = langs
         self.rules = rules
         self.max_length = max_length
@@ -40,8 +48,7 @@ class RuleList:
         self.exclude_max_length_fns = exclude_max_length_fns
         self.exclude_max_length_line_patterns = exclude_max_length_line_patterns
 
-    def get_line_info_from_file(self, fn):
-        # type: (str) -> List[LineTup]
+    def get_line_info_from_file(self, fn: str) -> List[LineTup]:
         line_tups = []
         for i, line in enumerate(open(fn)):
             line_newline_stripped = line.strip('\n')
@@ -52,8 +59,7 @@ class RuleList:
             line_tups.append(tup)
         return line_tups
 
-    def get_rules_applying_to_fn(self, fn, rules):
-        # type: (str, List[Rule]) -> List[Rule]
+    def get_rules_applying_to_fn(self, fn: str, rules: List[Rule]) -> List[Rule]:
         rules_to_apply = []
         for rule in rules:
             excluded = False
@@ -74,13 +80,14 @@ class RuleList:
 
         return rules_to_apply
 
-    def check_file_for_pattern(self,
-                               fn,
-                               line_tups,
-                               identifier,
-                               color,
-                               rule):
-        # type: (str, List[LineTup], str, str, Rule) -> bool
+    def check_file_for_pattern(
+        self,
+        fn: str,
+        line_tups: List[LineTup],
+        identifier: str,
+        color: str,
+        rule: Rule,
+    ) -> bool:
 
         '''
         DO NOT MODIFY THIS FUNCTION WITHOUT PROFILING.
@@ -131,8 +138,15 @@ class RuleList:
 
         return ok
 
-    def print_error(self, rule, line, identifier, color, fn, line_number):
-        # type: (Rule, str, str, str, str, int) -> None
+    def print_error(
+        self,
+        rule: Rule,
+        line: str,
+        identifier: str,
+        color: str,
+        fn: str,
+        line_number: int,
+    ) -> None:
         print_err(identifier, color, '{} {}at {} line {}:'.format(
             YELLOW + rule['description'], BLUE, fn, line_number))
         print_err(identifier, color, line)
@@ -145,11 +159,12 @@ class RuleList:
                     (YELLOW + " | " + MAGENTA).join(rule['bad_lines']), ENDC))
             print_err(identifier, color, "")
 
-    def check_file_for_long_lines(self,
-                                  fn,
-                                  max_length,
-                                  line_tups):
-        # type: (str, int, List[LineTup]) -> bool
+    def check_file_for_long_lines(
+        self,
+        fn: str,
+        max_length: int,
+        line_tups: List[LineTup]
+    ) -> bool:
         ok = True
         for (i, line, line_newline_stripped, line_fully_stripped) in line_tups:
             if isinstance(line, bytes):
@@ -163,12 +178,13 @@ class RuleList:
                 ok = False
         return ok
 
-    def custom_check_file(self,
-                          fn,
-                          identifier,
-                          color,
-                          max_length=None):
-        # type: (str, str, str, Optional[int]) -> bool
+    def custom_check_file(
+        self,
+        fn: str,
+        identifier: str,
+        color: str,
+        max_length: Optional[int] = None,
+    ) -> bool:
         failed = False
 
         line_tups = self.get_line_info_from_file(fn=fn)
@@ -216,8 +232,7 @@ class RuleList:
 
         return failed
 
-    def check(self, by_lang, verbose=False):
-        # type: (Dict[str, List[str]], bool) -> bool
+    def check(self, by_lang: Dict[str, List[str]], verbose: bool = False) -> bool:
         # By default, a rule applies to all files within the extension for
         # which it is specified (e.g. all .py files)
         # There are three operators we can use to manually include or exclude files from linting for a rule:

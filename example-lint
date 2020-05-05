@@ -7,8 +7,7 @@ from zulint.linters import run_pyflakes
 from zulint.command import add_default_linter_arguments, LinterConfig
 from zulint.custom_rules import RuleList
 
-def run():
-    # type: () -> None
+def run() -> None:
     parser = argparse.ArgumentParser()
     # Add custom parser arguments here.
 
@@ -31,8 +30,7 @@ def run():
                                   description="Static type checker for Python")
 
     @linter_config.lint
-    def check_custom_rules():
-        # type: () -> int
+    def check_custom_rules() -> int:
         """Check trailing whitespace for specified files"""
         trailing_whitespace_rule = RuleList(
             langs=file_types,
@@ -46,8 +44,7 @@ def run():
         return 1 if failed else 0
 
     @linter_config.lint
-    def pyflakes():
-        # type: () -> int
+    def pyflakes() -> int:
         suppress_patterns = [
             # Error patters in this list will be will not be reported by the linter.
             # syntax: ('File Path', 'Error message')
