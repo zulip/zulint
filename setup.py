@@ -1,19 +1,16 @@
-import io
 from setuptools import find_packages, setup
 
 VERSION="1.0.0"
 
 REQUIRED = [
-    'six',
     'pyflakes',
     'pycodestyle',
-    'typing;python_version<"3.5"',
     'typing-extensions',
 ]
 
 def long_description():
     # type: () -> str
-    with io.open('README.md', encoding='utf8') as f:
+    with open('README.md', encoding='utf8') as f:
         return f.read()
 
 setup(
@@ -24,7 +21,7 @@ setup(
     long_description=long_description(),
     long_description_content_type='text/markdown',
     author_email='zulip-devel@googlegroups.com',
-    python_requires='>=2.7.0',
+    python_requires='>=3.5',
     url='https://github.com/zulip/zulint',
     packages=find_packages(exclude=('tests',)),
     package_data={
