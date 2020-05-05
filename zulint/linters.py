@@ -1,9 +1,6 @@
 import argparse
 import subprocess
-
-MYPY = False
-if MYPY:
-    from typing import List, Tuple
+from typing import List, Tuple
 
 from zulint.printer import print_err, colors
 
