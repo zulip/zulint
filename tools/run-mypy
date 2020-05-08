@@ -93,7 +93,7 @@ if args.quick:
     extra_args.append("--quick")
 
 # run mypy
-status = subprocess.call([mypy_command] + extra_args + python_files)
+status = subprocess.call([mypy_command, *extra_args, "--", *python_files])
 
 if status != 0:
     print("")

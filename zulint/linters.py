@@ -12,7 +12,7 @@ def run_pycodestyle(files: List[str], ignored_rules: List[str]) -> bool:
     failed = False
     color = next(colors)
     pep8 = subprocess.Popen(
-        ['pycodestyle'] + files + ['--ignore={rules}'.format(rules=','.join(ignored_rules))],
+        ['pycodestyle', '--ignore={rules}'.format(rules=','.join(ignored_rules)), '--', *files],
         stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     assert pep8.stdout is not None  # Implied by use of subprocess.PIPE
     for line in iter(pep8.stdout.readline, b''):
@@ -30,7 +30,7 @@ def run_pyflakes(
         return False
     failed = False
     color = next(colors)
-    pyflakes = subprocess.Popen(['pyflakes'] + files,
+    pyflakes = subprocess.Popen(['pyflakes', '--', *files],
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE,
                                 universal_newlines=True)
