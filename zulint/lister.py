@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import stat
 import sys
 import subprocess
 import re
@@ -99,9 +100,12 @@ def list_files(
     if modified_only:
         cmdline.append('-m')
 
-    files_gen = (x.strip() for x in subprocess.check_output(cmdline, universal_newlines=True).split('\n'))
-    # throw away empty lines and non-files (like symlinks)
-    files = list(filter(os.path.isfile, files_gen))
+    files = subprocess.check_output(
+        ["git", "ls-files", "-z"], encoding="utf-8",
+    ).split("\0")
+    assert files.pop() == ""
+    # throw away non-files (like symlinks)
+    files = [f for f in files if stat.S_ISREG(os.lstat(f).st_mode)]
 
     result_dict = defaultdict(list)  # type: Dict[str, List[str]]
     result_list = []  # type: List[str]
