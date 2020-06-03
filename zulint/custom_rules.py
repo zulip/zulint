@@ -50,13 +50,14 @@ class RuleList:
 
     def get_line_info_from_file(self, fn: str) -> List[LineTup]:
         line_tups = []
-        for i, line in enumerate(open(fn)):
-            line_newline_stripped = line.strip('\n')
-            line_fully_stripped = line_newline_stripped.strip()
-            if line_fully_stripped.endswith('  # nolint'):
-                continue
-            tup = (i, line, line_newline_stripped, line_fully_stripped)
-            line_tups.append(tup)
+        with open(fn) as f:
+            for i, line in enumerate(f):
+                line_newline_stripped = line.strip('\n')
+                line_fully_stripped = line_newline_stripped.strip()
+                if line_fully_stripped.endswith('  # nolint'):
+                    continue
+                tup = (i, line, line_newline_stripped, line_fully_stripped)
+                line_tups.append(tup)
         return line_tups
 
     def get_rules_applying_to_fn(self, fn: str, rules: List[Rule]) -> List[Rule]:

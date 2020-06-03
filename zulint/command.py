@@ -140,15 +140,16 @@ class LinterConfig:
                 full_command = command + targets
             else:
                 full_command = command
-            p = subprocess.Popen(full_command,
-                                 stdout=subprocess.PIPE,
-                                 stderr=subprocess.STDOUT)
+            with subprocess.Popen(
+                full_command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+            ) as p:
+                assert p.stdout  # use of subprocess.PIPE indicates non-None
+                for line in iter(p.stdout.readline, b''):
+                    print_err(name, color, line)
 
-            assert p.stdout  # use of subprocess.PIPE indicates non-None
-            for line in iter(p.stdout.readline, b''):
-                print_err(name, color, line)
-
-            return p.wait()  # Linter exit code
+                return p.wait()  # Linter exit code
 
         self.lint_functions[name] = run_linter
 
