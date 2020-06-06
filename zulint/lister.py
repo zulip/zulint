@@ -96,12 +96,12 @@ def list_files(
                                                '--show-toplevel']).strip().decode('utf-8')
     exclude_abspaths = [os.path.abspath(os.path.join(repository_root, fpath)) for fpath in exclude]
 
-    cmdline = ['git', 'ls-files'] + targets
+    cmdline = ["git", "ls-files", "-z"] + targets
     if modified_only:
         cmdline.append('-m')
 
     files = subprocess.check_output(
-        ["git", "ls-files", "-z"], encoding="utf-8",
+        cmdline, encoding="utf-8",
     ).split("\0")
     assert files.pop() == ""
     # throw away non-files (like symlinks)
