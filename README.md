@@ -7,7 +7,7 @@ applications using a mix of third-party linters and custom rules.
 
 Modern full-stack web applications generally involve code written in
 several programming languages, each of which have their own standard
-linter tools.  For example, [Zulip](https://zulipchat.com) uses Python
+linter tools.  For example, [Zulip](https://zulip.com) uses Python
 (mypy/pyflake/pycodestyle), JavaScript (eslint), CSS (stylelint),
 puppet (puppet-lint), shell (shellcheck), and several more.  For many
 codebases, this results in linting being an unpleasantly slow
