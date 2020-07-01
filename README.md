@@ -1,5 +1,7 @@
 # zulint
 
+![CI](https://github.com/zulip/zulint/workflows/CI/badge.svg)
+
 zulint is a lightweight linting framework designed for complex
 applications using a mix of third-party linters and custom rules.
 
