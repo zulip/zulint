@@ -7,7 +7,7 @@ import subprocess
 import re
 from collections import defaultdict
 import argparse
-from typing import Union, List, Dict, overload
+from typing import Dict, List, Sequence, Union, overload
 from typing_extensions import Literal
 
 def get_ftype(fpath: str, use_shebang: bool) -> str:
@@ -41,11 +41,11 @@ def get_ftype(fpath: str, use_shebang: bool) -> str:
 @overload
 def list_files(
     group_by_ftype: Literal[False] = False,
-    targets: List[str] = [],
-    ftypes: List[str] = [],
+    targets: Sequence[str] = [],
+    ftypes: Sequence[str] = [],
     use_shebang: bool = True,
     modified_only: bool = False,
-    exclude: List[str] = [],
+    exclude: Sequence[str] = [],
     extless_only: bool = False,
 ) -> List[str]:
     ...
@@ -53,21 +53,21 @@ def list_files(
 @overload
 def list_files(
     group_by_ftype: Literal[True],
-    targets: List[str] = [],
-    ftypes: List[str] = [],
+    targets: Sequence[str] = [],
+    ftypes: Sequence[str] = [],
     use_shebang: bool = True,
-    modified_only: bool = False, exclude: List[str] = [],
+    modified_only: bool = False, exclude: Sequence[str] = [],
     extless_only: bool = False,
 ) -> Dict[str, List[str]]:
     ...
 
 def list_files(
     group_by_ftype: bool = False,
-    targets: List[str] = [],
-    ftypes: List[str] = [],
+    targets: Sequence[str] = [],
+    ftypes: Sequence[str] = [],
     use_shebang: bool = True,
     modified_only: bool = False,
-    exclude: List[str] = [],
+    exclude: Sequence[str] = [],
     extless_only: bool = False,
 ) -> Union[Dict[str, List[str]], List[str]]:
     """
@@ -96,7 +96,7 @@ def list_files(
                                                '--show-toplevel']).strip().decode('utf-8')
     exclude_abspaths = [os.path.abspath(os.path.join(repository_root, fpath)) for fpath in exclude]
 
-    cmdline = ["git", "ls-files", "-z"] + targets
+    cmdline = ["git", "ls-files", "-z", *targets]
     if modified_only:
         cmdline.append('-m')
 

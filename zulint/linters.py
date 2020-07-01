@@ -1,11 +1,11 @@
 import argparse
 import subprocess
-from typing import List, Tuple
+from typing import Sequence, Tuple
 
 from zulint.printer import print_err, colors
 
 
-def run_pycodestyle(files: List[str], ignored_rules: List[str]) -> bool:
+def run_pycodestyle(files: Sequence[str], ignored_rules: Sequence[str]) -> bool:
     if len(files) == 0:
         return False
 
@@ -24,9 +24,9 @@ def run_pycodestyle(files: List[str], ignored_rules: List[str]) -> bool:
 
 
 def run_pyflakes(
-    files: List[str],
+    files: Sequence[str],
     options: argparse.Namespace,
-    suppress_patterns: List[Tuple[str, str]] = [],
+    suppress_patterns: Sequence[Tuple[str, str]] = [],
 ) -> bool:
     if len(files) == 0:
         return False

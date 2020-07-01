@@ -1,18 +1,18 @@
 import re
 import traceback
-from typing import Dict, List, Optional, Set, Tuple
+from typing import AbstractSet, List, Mapping, Optional, Sequence, Tuple
 from typing_extensions import TypedDict
 
 from zulint.printer import print_err, colors, GREEN, ENDC, MAGENTA, BLUE, YELLOW
 
 Rule = TypedDict("Rule", {
-    "bad_lines": List[str],
+    "bad_lines": Sequence[str],
     "description": str,
-    "exclude": Set[str],
-    "exclude_line": Set[Tuple[str, str]],
+    "exclude": AbstractSet[str],
+    "exclude_line": AbstractSet[Tuple[str, str]],
     "exclude_pattern": str,
-    "good_lines": List[str],
-    "include_only": Set[str],
+    "good_lines": Sequence[str],
+    "include_only": AbstractSet[str],
     "pattern": str,
     "strip": str,
     "strip_rule": str,
@@ -25,14 +25,14 @@ class RuleList:
 
     def __init__(
         self,
-        langs: List[str],
-        rules: List[Rule],
+        langs: Sequence[str],
+        rules: Sequence[Rule],
         max_length: Optional[int] = None,
-        length_exclude: Set[str] = set(),
-        shebang_rules: List[Rule] = [],
+        length_exclude: AbstractSet[str] = set(),
+        shebang_rules: Sequence[Rule] = [],
         exclude_files_in: Optional[str] = None,
-        exclude_max_length_fns: List[str] = [],
-        exclude_max_length_line_patterns: List[str] = [],
+        exclude_max_length_fns: Sequence[str] = [],
+        exclude_max_length_line_patterns: Sequence[str] = [],
     ) -> None:
         self.langs = langs
         self.rules = rules
@@ -60,7 +60,7 @@ class RuleList:
                 line_tups.append(tup)
         return line_tups
 
-    def get_rules_applying_to_fn(self, fn: str, rules: List[Rule]) -> List[Rule]:
+    def get_rules_applying_to_fn(self, fn: str, rules: Sequence[Rule]) -> List[Rule]:
         rules_to_apply = []
         for rule in rules:
             excluded = False
@@ -84,7 +84,7 @@ class RuleList:
     def check_file_for_pattern(
         self,
         fn: str,
-        line_tups: List[LineTup],
+        line_tups: Sequence[LineTup],
         identifier: str,
         color: str,
         rule: Rule,
@@ -164,7 +164,7 @@ class RuleList:
         self,
         fn: str,
         max_length: int,
-        line_tups: List[LineTup]
+        line_tups: Sequence[LineTup]
     ) -> bool:
         ok = True
         for (i, line, line_newline_stripped, line_fully_stripped) in line_tups:
@@ -233,7 +233,7 @@ class RuleList:
 
         return failed
 
-    def check(self, by_lang: Dict[str, List[str]], verbose: bool = False) -> bool:
+    def check(self, by_lang: Mapping[str, Sequence[str]], verbose: bool = False) -> bool:
         # By default, a rule applies to all files within the extension for
         # which it is specified (e.g. all .py files)
         # There are three operators we can use to manually include or exclude files from linting for a rule:

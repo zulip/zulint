@@ -3,7 +3,7 @@ import logging
 import os
 import subprocess
 import sys
-from typing import Callable, Dict, List, Optional, NoReturn
+from typing import Callable, Dict, List, Mapping, Optional, NoReturn, Sequence
 
 from zulint.printer import print_err, colors, BOLDRED, BLUE, GREEN, ENDC
 from zulint import lister
@@ -47,7 +47,7 @@ def add_default_linter_arguments(parser: argparse.ArgumentParser) -> None:
 def split_arg_into_list(arg: str) -> List[str]:
     return [linter for linter in arg.split(',')]
 
-def run_parallel(lint_functions: Dict[str, Callable[[], int]]) -> bool:
+def run_parallel(lint_functions: Mapping[str, Callable[[], int]]) -> bool:
     pids = []
     for name, func in lint_functions.items():
         pid = os.fork()
@@ -74,14 +74,14 @@ class LinterConfig:
     def __init__(self, args: argparse.Namespace) -> None:
         self.args = args
         self.by_lang = {}  # type: Dict[str, List[str]]
-        self.groups = {}  # type: Dict[str, List[str]]
+        self.groups = {}  # type: Mapping[str, Sequence[str]]
 
     def list_files(
         self,
-        file_types: List[str] = [],
-        groups: Dict[str, List[str]] = {},
+        file_types: Sequence[str] = [],
+        groups: Mapping[str, Sequence[str]] = {},
         use_shebang: bool = True,
-        exclude: List[str] = [],
+        exclude: Sequence[str] = [],
     ) -> Dict[str, List[str]]:
         assert file_types or groups, "Atleast one of `file_types` or `groups` must be specified."
 
@@ -89,7 +89,7 @@ class LinterConfig:
         if self.args.groups:
             file_types = [ft for group in self.args.groups for ft in groups[group]]
         else:
-            file_types.extend({ft for group in groups.values() for ft in group})
+            file_types = [*file_types, *{ft for group in groups.values() for ft in group}]
 
         self.by_lang = lister.list_files(
             targets=self.args.targets, modified_only=self.args.modified,
@@ -106,8 +106,8 @@ class LinterConfig:
     def external_linter(
         self,
         name: str,
-        command: List[str],
-        target_langs: List[str] = [],
+        command: Sequence[str],
+        target_langs: Sequence[str] = [],
         pass_targets: bool = True,
         fix_arg: Optional[str] = None,
         description: str = "External Linter",
@@ -133,13 +133,12 @@ class LinterConfig:
                     # invoking the external linter.
                     return 0
 
+            full_command = list(command)
             if self.args.fix and fix_arg:
-                command.append(fix_arg)
-
+                full_command.append(fix_arg)
             if pass_targets:
-                full_command = command + targets
-            else:
-                full_command = command
+                full_command += targets
+
             with subprocess.Popen(
                 full_command,
                 stdout=subprocess.PIPE,
