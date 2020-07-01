@@ -102,9 +102,7 @@ def list_files(
     if modified_only:
         cmdline.append('-m')
 
-    files = subprocess.check_output(
-        cmdline, encoding="utf-8",
-    ).split("\0")
+    files = [f.decode() for f in subprocess.check_output(cmdline).split(b"\0")]
     assert files.pop() == ""
     # throw away non-files (like symlinks)
     files = [f for f in files if stat.S_ISREG(os.lstat(f).st_mode)]
