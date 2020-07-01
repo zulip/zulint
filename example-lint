@@ -3,9 +3,10 @@
 import argparse
 from typing import List, Tuple
 
-from zulint.linters import run_pyflakes
-from zulint.command import add_default_linter_arguments, LinterConfig
+from zulint.command import LinterConfig, add_default_linter_arguments
 from zulint.custom_rules import RuleList
+from zulint.linters import run_pyflakes
+
 
 def run() -> None:
     parser = argparse.ArgumentParser()

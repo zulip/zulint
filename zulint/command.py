@@ -5,8 +5,9 @@ import subprocess
 import sys
 from typing import Callable, Dict, List, Mapping, NoReturn, Sequence, Union
 
-from zulint.printer import print_err, colors, BOLDRED, BLUE, GREEN, ENDC
 from zulint import lister
+from zulint.printer import BLUE, BOLDRED, ENDC, GREEN, colors, print_err
+
 
 def add_default_linter_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument('--modified', '-m',

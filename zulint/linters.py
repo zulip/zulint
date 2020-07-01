@@ -2,7 +2,7 @@ import argparse
 import subprocess
 from typing import Sequence, Tuple
 
-from zulint.printer import print_err, colors
+from zulint.printer import colors, print_err
 
 
 def run_pycodestyle(files: Sequence[str], ignored_rules: Sequence[str]) -> bool:
