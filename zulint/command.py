@@ -3,7 +3,7 @@ import logging
 import os
 import subprocess
 import sys
-from typing import Callable, Dict, List, Mapping, Optional, NoReturn, Sequence
+from typing import Callable, Dict, List, Mapping, NoReturn, Sequence, Union
 
 from zulint.printer import print_err, colors, BOLDRED, BLUE, GREEN, ENDC
 from zulint import lister
@@ -109,8 +109,9 @@ class LinterConfig:
         command: Sequence[str],
         target_langs: Sequence[str] = [],
         pass_targets: bool = True,
-        fix_arg: Optional[str] = None,
+        fix_arg: Union[str, Sequence[str]] = [],
         description: str = "External Linter",
+        check_arg: Union[str, Sequence[str]] = [],
     ) -> None:
         """Registers an external linter program to be run as part of the
         linter.  This program will be passed the subset of files being
@@ -134,8 +135,9 @@ class LinterConfig:
                     return 0
 
             full_command = list(command)
-            if self.args.fix and fix_arg:
-                full_command.append(fix_arg)
+            arg = fix_arg if self.args.fix else check_arg
+            full_command += [arg] if isinstance(arg, str) else arg
+
             if pass_targets:
                 full_command += targets
 
