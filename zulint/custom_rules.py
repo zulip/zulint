@@ -3,6 +3,7 @@ import traceback
 from typing import AbstractSet, List, Mapping, Optional, Sequence, Tuple
 
 from typing_extensions import TypedDict
+
 from zulint.printer import BLUE, ENDC, GREEN, MAGENTA, YELLOW, colors, print_err
 
 Rule = TypedDict("Rule", {
