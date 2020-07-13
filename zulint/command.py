@@ -113,6 +113,7 @@ class LinterConfig:
         fix_arg: Union[str, Sequence[str]] = [],
         description: str = "External Linter",
         check_arg: Union[str, Sequence[str]] = [],
+        suppress_line: Callable[[str], bool] = lambda line: False,
     ) -> None:
         """Registers an external linter program to be run as part of the
         linter.  This program will be passed the subset of files being
@@ -142,7 +143,7 @@ class LinterConfig:
             if pass_targets:
                 full_command += targets
 
-            return run_command(name, color, full_command)
+            return run_command(name, color, full_command, suppress_line)
 
         self.lint_functions[name] = run_linter
 
