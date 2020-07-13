@@ -1,12 +1,12 @@
 import argparse
 import logging
 import os
-import subprocess
 import sys
 from typing import Callable, Dict, List, Mapping, NoReturn, Sequence, Union
 
 from zulint import lister
-from zulint.printer import BLUE, BOLDRED, ENDC, GREEN, colors, print_err
+from zulint.linters import run_command
+from zulint.printer import BLUE, BOLDRED, ENDC, GREEN, colors
 
 
 def add_default_linter_arguments(parser: argparse.ArgumentParser) -> None:
@@ -142,17 +142,7 @@ class LinterConfig:
             if pass_targets:
                 full_command += targets
 
-            with subprocess.Popen(
-                full_command,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                universal_newlines=True,
-            ) as p:
-                assert p.stdout  # use of subprocess.PIPE indicates non-None
-                for line in iter(p.stdout.readline, ''):
-                    print_err(name, color, line)
-
-                return p.wait()  # Linter exit code
+            return run_command(name, color, full_command)
 
         self.lint_functions[name] = run_linter
 
