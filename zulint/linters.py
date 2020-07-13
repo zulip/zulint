@@ -15,9 +15,10 @@ def run_pycodestyle(files: Sequence[str], ignored_rules: Sequence[str]) -> bool:
         ['pycodestyle', '--ignore={rules}'.format(rules=','.join(ignored_rules)), '--', *files],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
+        universal_newlines=True,
     ) as pep8:
         assert pep8.stdout is not None  # Implied by use of subprocess.PIPE
-        for line in iter(pep8.stdout.readline, b''):
+        for line in iter(pep8.stdout.readline, ''):
             print_err('pep8', color, line)
             failed = True
     return failed

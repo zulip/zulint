@@ -146,9 +146,10 @@ class LinterConfig:
                 full_command,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
+                universal_newlines=True,
             ) as p:
                 assert p.stdout  # use of subprocess.PIPE indicates non-None
-                for line in iter(p.stdout.readline, b''):
+                for line in iter(p.stdout.readline, ''):
                     print_err(name, color, line)
 
                 return p.wait()  # Linter exit code

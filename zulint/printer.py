@@ -1,6 +1,4 @@
-import sys
 from itertools import cycle
-from typing import Text, Union
 
 # Terminal Color codes for use in differentiatng linters
 BOLDRED = '\x1B[1;31m'
@@ -13,21 +11,12 @@ ENDC = '\033[0m'
 
 colors = cycle([GREEN, YELLOW, BLUE, MAGENTA, CYAN])
 
-def print_err(name: str, color: str, line: Union[Text, bytes]) -> None:
-
-    # Decode with UTF-8 if in Python 3 and `line` is of bytes type.
-    # (Python 2 does this automatically)
-    if sys.version_info[0] == 3 and isinstance(line, bytes):
-        line = line.decode('utf-8')
-
+def print_err(name: str, color: str, line: str) -> None:
     print('{color}{name}{pad}|{end} {red_color}{line!s}{end}'.format(
         color=color,
         name=name,
         pad=' ' * max(0, 10 - len(name)),
         red_color=BOLDRED,
         line=line.rstrip(),
-        end=ENDC)
-    )
-
-    # Python 2's print function does not have a `flush` option.
-    sys.stdout.flush()
+        end=ENDC,
+    ), flush=True)

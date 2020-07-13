@@ -169,10 +169,7 @@ class RuleList:
     ) -> bool:
         ok = True
         for (i, line, line_newline_stripped, line_fully_stripped) in line_tups:
-            if isinstance(line, bytes):
-                line_length = len(line.decode("utf-8"))
-            else:
-                line_length = len(line)
+            line_length = len(line)
             if (line_length > max_length and
                 not re.findall(r'|'.join(self.exclude_max_length_fns), fn) and
                 not re.findall(r'|'.join(self.exclude_max_length_line_patterns), line)):
