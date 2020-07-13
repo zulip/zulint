@@ -44,12 +44,26 @@ def run_pyflakes(
 ) -> bool:
     if len(files) == 0:
         return False
+    failed = False
+    color = next(colors)
+    with subprocess.Popen(
+        ['pyflakes', '--', *files],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        universal_newlines=True,
+    ) as pyflakes:
+        # Implied by use of subprocess.PIPE
+        assert pyflakes.stdout is not None
+        assert pyflakes.stderr is not None
 
-    def suppress_line(line: str) -> bool:
-        for file_pattern, line_pattern in suppress_patterns:
-            if file_pattern in line and line_pattern in line:
-                return True
-        return False
+        def suppress_line(line: str) -> bool:
+            for file_pattern, line_pattern in suppress_patterns:
+                if file_pattern in line and line_pattern in line:
+                    return True
+            return False
 
-    command = ["pyflakes", "--", *files]
-    return run_command("pyflakes", next(colors), command, suppress_line) != 0
+        for ln in pyflakes.stdout.readlines() + pyflakes.stderr.readlines():
+            if not suppress_line(ln):
+                print_err('pyflakes', color, ln)
+                failed = True
+    return failed
