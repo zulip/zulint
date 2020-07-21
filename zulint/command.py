@@ -193,5 +193,11 @@ class LinterConfig:
             sys.exit()
         self.set_logger()
 
-        failed = run_parallel(self.lint_functions, self.args.jobs)
+        jobs = self.args.jobs
+        if self.args.fix:
+            # Do not run multiple fixers in parallel, since they might
+            # race with each other and corrupt each other’s output.
+            jobs = 1
+
+        failed = run_parallel(self.lint_functions, jobs)
         sys.exit(1 if failed else 0)
