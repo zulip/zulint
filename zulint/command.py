@@ -2,7 +2,7 @@ import argparse
 import logging
 import os
 import sys
-from typing import Callable, Dict, List, Mapping, NoReturn, Sequence, Union
+from typing import Callable, Dict, List, Mapping, NoReturn, Sequence, Set, Union
 
 from zulint import lister
 from zulint.linters import run_command
@@ -44,13 +44,30 @@ def add_default_linter_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument('--fix',
                         action='store_true',
                         help='Automatically fix problems where supported')
+    parser.add_argument('--jobs', '-j',
+                        default=-1,
+                        type=int,
+                        help='Limit number of parallel jobs')
 
 def split_arg_into_list(arg: str) -> List[str]:
     return [linter for linter in arg.split(',')]
 
-def run_parallel(lint_functions: Mapping[str, Callable[[], int]]) -> bool:
-    pids = []
+def run_parallel(lint_functions: Mapping[str, Callable[[], int]], jobs: int) -> bool:
+    pids = set()  # type: Set[int]
+    failed = False
+
     for name, func in lint_functions.items():
+        while jobs == 0:
+            # We reached the parallelism limit; wait for a job to finish
+            pid, status = os.wait()
+            if pid in pids:
+                if status != 0:
+                    failed = True
+                pids.remove(pid)
+                jobs += 1
+
+        # Start another job
+        jobs -= 1
         pid = os.fork()
         if pid == 0:
             logging.info("start " + name)
@@ -59,13 +76,16 @@ def run_parallel(lint_functions: Mapping[str, Callable[[], int]]) -> bool:
             sys.stdout.flush()
             sys.stderr.flush()
             os._exit(result)
-        pids.append(pid)
-    failed = False
+        pids.add(pid)
 
-    for pid in pids:
-        (_, status) = os.waitpid(pid, 0)
-        if status != 0:
-            failed = True
+    # Wait for the remaining jobs to finish
+    while pids:
+        pid, status = os.wait()
+        if pid in pids:
+            if status != 0:
+                failed = True
+            pids.remove(pid)
+
     return failed
 
 class LinterConfig:
@@ -173,5 +193,5 @@ class LinterConfig:
             sys.exit()
         self.set_logger()
 
-        failed = run_parallel(self.lint_functions)
+        failed = run_parallel(self.lint_functions, self.args.jobs)
         sys.exit(1 if failed else 0)
