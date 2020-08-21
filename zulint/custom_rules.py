@@ -109,6 +109,7 @@ class RuleList:
             (exclude_fn, line) in rule.get('exclude_line', set())
             if exclude_fn == fn
         }
+        unmatched_exclude_lines = exclude_lines.copy()
 
         pattern = re.compile(rule['pattern'])
         strip_rule = rule.get('strip')  # type: Optional[str]
@@ -116,7 +117,7 @@ class RuleList:
         ok = True
         for (i, line, line_newline_stripped, line_fully_stripped) in line_tups:
             if line_fully_stripped in exclude_lines:
-                exclude_lines.remove(line_fully_stripped)
+                unmatched_exclude_lines.discard(line_fully_stripped)
                 continue
             try:
                 line_to_check = line_fully_stripped
@@ -135,8 +136,8 @@ class RuleList:
                 print("Exception with %s at %s line %s" % (rule['pattern'], fn, i+1))
                 traceback.print_exc()
 
-        if exclude_lines:
-            print('Please remove exclusions for file %s: %s' % (fn, exclude_lines))
+        if unmatched_exclude_lines:
+            print('Please remove exclusions for file %s: %s' % (fn, unmatched_exclude_lines))
 
         return ok
 
