@@ -1,8 +1,9 @@
 import argparse
 import logging
-import os
+import multiprocessing
 import sys
-from typing import Callable, Dict, List, Mapping, NoReturn, Sequence, Set, Union
+import weakref
+from typing import Callable, Dict, List, Mapping, NoReturn, Sequence, Tuple, Union
 
 from zulint import lister
 from zulint.linters import run_command
@@ -45,47 +46,41 @@ def add_default_linter_arguments(parser: argparse.ArgumentParser) -> None:
                         action='store_true',
                         help='Automatically fix problems where supported')
     parser.add_argument('--jobs', '-j',
-                        default=-1,
                         type=int,
                         help='Limit number of parallel jobs')
 
 def split_arg_into_list(arg: str) -> List[str]:
     return [linter for linter in arg.split(',')]
 
+run_parallel_functions = weakref.WeakValueDictionary()  # type: weakref.WeakValueDictionary[int, Callable[[], int]]
+
+def run_parallel_worker(item: Tuple[str, int]) -> int:
+    name, func_id = item
+    func = run_parallel_functions[func_id]
+    logging.info("start " + name)
+    result = func()
+    logging.info("finish " + name)
+    sys.stdout.flush()
+    sys.stderr.flush()
+    return result
+
 def run_parallel(lint_functions: Mapping[str, Callable[[], int]], jobs: int) -> bool:
-    pids = set()  # type: Set[int]
+    # Smuggle the functions through a global variable to work around
+    # multiprocessing's inability to pickle closures.
+    for func in lint_functions.values():
+        run_parallel_functions[id(func)] = func
+
     failed = False
-
-    for name, func in lint_functions.items():
-        while jobs == 0:
-            # We reached the parallelism limit; wait for a job to finish
-            pid, status = os.wait()
-            if pid in pids:
-                if status != 0:
+    args = ((name, id(func)) for name, func in lint_functions.items())
+    if jobs != 1 and multiprocessing.get_start_method() == "fork":
+        with multiprocessing.Pool(jobs) as pool:
+            for result in pool.imap_unordered(run_parallel_worker, args):
+                if result != 0:
                     failed = True
-                pids.remove(pid)
-                jobs += 1
-
-        # Start another job
-        jobs -= 1
-        pid = os.fork()
-        if pid == 0:
-            logging.info("start " + name)
-            result = func()
-            logging.info("finish " + name)
-            sys.stdout.flush()
-            sys.stderr.flush()
-            os._exit(result)
-        pids.add(pid)
-
-    # Wait for the remaining jobs to finish
-    while pids:
-        pid, status = os.wait()
-        if pid in pids:
-            if status != 0:
+    else:
+        for result in map(run_parallel_worker, args):
+            if result != 0:
                 failed = True
-            pids.remove(pid)
-
     return failed
 
 class LinterConfig:
