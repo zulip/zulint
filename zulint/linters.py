@@ -16,6 +16,7 @@ def run_command(
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         universal_newlines=True,
+        shell=True,
     ) as p:
         assert p.stdout is not None
         for line in iter(p.stdout.readline, ""):
@@ -51,6 +52,7 @@ def run_pyflakes(
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         universal_newlines=True,
+        shell=True,
     ) as pyflakes:
         # Implied by use of subprocess.PIPE
         assert pyflakes.stdout is not None
