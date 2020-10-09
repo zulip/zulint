@@ -3,7 +3,7 @@ import logging
 import multiprocessing
 import sys
 import weakref
-from typing import Callable, Dict, List, Mapping, NoReturn, Sequence, Tuple, Union
+from typing import Callable, Dict, List, Mapping, NoReturn, Sequence, Set, Tuple, Union
 
 from zulint import lister
 from zulint.linters import run_command
@@ -54,7 +54,7 @@ def split_arg_into_list(arg: str) -> List[str]:
 
 run_parallel_functions = weakref.WeakValueDictionary()  # type: weakref.WeakValueDictionary[int, Callable[[], int]]
 
-def run_parallel_worker(item: Tuple[str, int]) -> int:
+def run_parallel_worker(item: Tuple[str, int]) -> Tuple[str, int]:
     name, func_id = item
     func = run_parallel_functions[func_id]
     logging.info("start " + name)
@@ -62,30 +62,31 @@ def run_parallel_worker(item: Tuple[str, int]) -> int:
     logging.info("finish " + name)
     sys.stdout.flush()
     sys.stderr.flush()
-    return result
+    return name, result
 
-def run_parallel(lint_functions: Mapping[str, Callable[[], int]], jobs: int) -> bool:
+def run_parallel(lint_functions: Mapping[str, Callable[[], int]], jobs: int) -> Set[str]:
     # Smuggle the functions through a global variable to work around
     # multiprocessing's inability to pickle closures.
     for func in lint_functions.values():
         run_parallel_functions[id(func)] = func
 
-    failed = False
+    failed_linters = set()
     args = ((name, id(func)) for name, func in lint_functions.items())
     if jobs != 1 and multiprocessing.get_start_method() == "fork":
         with multiprocessing.Pool(jobs) as pool:
-            for result in pool.imap_unordered(run_parallel_worker, args):
+            for name, result in pool.imap_unordered(run_parallel_worker, args):
                 if result != 0:
-                    failed = True
+                    failed_linters.add(name)
     else:
-        for result in map(run_parallel_worker, args):
+        for name, result in map(run_parallel_worker, args):
             if result != 0:
-                failed = True
-    return failed
+                failed_linters.add(name)
+    return failed_linters
 
 class LinterConfig:
     lint_functions = {}  # type: Dict[str, Callable[[], int]]
     lint_descriptions = {}  # type: Dict[str, str]
+    fixable_linters = set()  # type: Set[str]
 
     def __init__(self, args: argparse.Namespace) -> None:
         self.args = args
@@ -138,6 +139,8 @@ class LinterConfig:
         If target_langs is empty, just runs the linter unconditionally.
         """
         self.lint_descriptions[name] = description
+        if fix_arg or check_arg:
+            self.fixable_linters.add(name)
         color = next(colors)
 
         def run_linter() -> int:
@@ -194,5 +197,14 @@ class LinterConfig:
             # race with each other and corrupt each other’s output.
             jobs = 1
 
-        failed = run_parallel(self.lint_functions, jobs)
-        sys.exit(1 if failed else 0)
+        failed_linters = run_parallel(self.lint_functions, jobs)
+
+        failed_fixable_linters = failed_linters & self.fixable_linters
+        if failed_fixable_linters:
+            print(
+                "Run {}{} --fix{} to fix errors for the following linters: {}".format(
+                    BLUE, sys.argv[0], ENDC, ",".join(sorted(failed_fixable_linters))
+                ),
+            )
+
+        sys.exit(1 if failed_linters else 0)
