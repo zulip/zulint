@@ -3,7 +3,6 @@
 import argparse
 import os
 import re
-import stat
 import subprocess
 import sys
 from collections import defaultdict
@@ -105,7 +104,7 @@ def list_files(
     files = [f.decode() for f in subprocess.check_output(cmdline).split(b"\0")]
     assert files.pop() == ""
     # throw away non-files (like symlinks)
-    files = [f for f in files if stat.S_ISREG(os.lstat(f).st_mode)]
+    files = [f for f in files if os.path.isfile(f)]
 
     result_dict = defaultdict(list)  # type: Dict[str, List[str]]
     result_list = []  # type: List[str]
