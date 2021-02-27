@@ -51,7 +51,7 @@ class RuleList:
 
     def get_line_info_from_file(self, fn: str) -> List[LineTup]:
         line_tups = []
-        with open(fn) as f:
+        with open(fn, encoding='utf8') as f:
             for i, line in enumerate(f):
                 line_newline_stripped = line.strip('\n')
                 line_fully_stripped = line_newline_stripped.strip()

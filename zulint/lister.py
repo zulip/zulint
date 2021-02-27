@@ -17,7 +17,7 @@ def get_ftype(fpath: str, use_shebang: bool) -> str:
         return ext[1:]
     elif use_shebang:
         # opening a file may throw an OSError
-        with open(fpath) as f:
+        with open(fpath, encoding='utf8') as f:
             first_line = f.readline()
             if re.search(r'^#!.*\bpython', first_line):
                 return 'py'
