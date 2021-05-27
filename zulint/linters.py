@@ -1,4 +1,5 @@
 import argparse
+import signal
 import subprocess
 from typing import Callable, Sequence, Tuple
 
@@ -21,7 +22,13 @@ def run_command(
         for line in iter(p.stdout.readline, ""):
             if not suppress_line(line):
                 print_err(name, color, line)
-        return p.wait()
+        if p.wait() < 0:
+            try:
+                signal_name = signal.Signals(-p.returncode).name
+            except (AttributeError, ValueError):
+                signal_name = "signal {}".format(-p.returncode)
+            print_err(name, color, "{} terminated by {}".format(command[0], signal_name))
+        return p.returncode
 
 
 def run_pycodestyle(files: Sequence[str], ignored_rules: Sequence[str]) -> bool:
