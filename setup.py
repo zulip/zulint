@@ -26,6 +26,7 @@ setup(
     package_data={
         'zulint': ["py.typed"],
     },
+    setup_requires=['wheel'],
     install_requires=REQUIRED,
     license='Apache License 2.0',
     classifiers=[
