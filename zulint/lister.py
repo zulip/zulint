@@ -104,7 +104,7 @@ def list_files(
     files = [f.decode() for f in subprocess.check_output(cmdline).split(b"\0")]
     assert files.pop() == ""
     # throw away non-files (like symlinks)
-    files = [f for f in files if os.path.isfile(f)]
+    files = [f for f in files if not os.path.islink(f) and os.path.isfile(f)]
 
     result_dict = defaultdict(list)  # type: Dict[str, List[str]]
     result_list = []  # type: List[str]
