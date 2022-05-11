@@ -34,6 +34,7 @@ class RuleList:
         exclude_files_in: Optional[str] = None,
         exclude_max_length_fns: Sequence[str] = [],
         exclude_max_length_line_patterns: Sequence[str] = [],
+        check_file_ends_with_newline: bool = True,
     ) -> None:
         self.langs = langs
         self.rules = rules
@@ -43,6 +44,7 @@ class RuleList:
         # Exclude the files in this folder from rules
         self.exclude_files_in = "\\"
         self.verbose = False
+        self.check_file_ends_with_newline = check_file_ends_with_newline
 
         # Exclude some file names and line patterns from max line length
         # These defaults are from https://github.com/zulip/zulip repository.
@@ -226,9 +228,10 @@ class RuleList:
                     self.print_error(rule, firstline, identifier, color, fn, 1)
                     failed = True
 
-        if lastLine and ('\n' not in lastLine):
-            print("No newline at the end of file. Fix with `sed -i '$a\\' %s`" % (fn,))
-            failed = True
+        if self.check_file_ends_with_newline:
+            if lastLine and ('\n' not in lastLine):
+                print("No newline at the end of file. Fix with `sed -i '$a\\' %s`" % (fn,))
+                failed = True
 
         return failed
 
