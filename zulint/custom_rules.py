@@ -15,9 +15,8 @@ Rule = TypedDict("Rule", {
     "good_lines": Sequence[str],
     "include_only": AbstractSet[str],
     "pattern": str,
-    "strip": str,
 }, total=False)
-LineTup = Tuple[int, str, str, str]
+LineTup = Tuple[int, str, str]
 
 
 class RuleList:
@@ -42,10 +41,9 @@ class RuleList:
         with open(fn, encoding='utf8') as f:
             for i, line in enumerate(f):
                 line_newline_stripped = line.strip('\n')
-                line_fully_stripped = line_newline_stripped.strip()
-                if line_fully_stripped.endswith('  # nolint'):
+                if line_newline_stripped.endswith('  # nolint'):
                     continue
-                tup = (i, line, line_newline_stripped, line_fully_stripped)
+                tup = (i, line, line_newline_stripped)
                 line_tups.append(tup)
         return line_tups
 
@@ -100,23 +98,16 @@ class RuleList:
         unmatched_exclude_lines = exclude_lines.copy()
 
         pattern = re.compile(rule['pattern'])
-        strip_rule = rule.get('strip')  # type: Optional[str]
 
         ok = True
-        for (i, line, line_newline_stripped, line_fully_stripped) in line_tups:
-            if line_fully_stripped in exclude_lines:
-                unmatched_exclude_lines.discard(line_fully_stripped)
+        for (i, line, line_newline_stripped) in line_tups:
+            if line_newline_stripped in exclude_lines:
+                unmatched_exclude_lines.discard(line_newline_stripped)
                 continue
             try:
-                line_to_check = line_fully_stripped
-                if strip_rule is not None:
-                    if strip_rule == '\n':
-                        line_to_check = line_newline_stripped
-                    else:
-                        raise Exception("Invalid strip rule")
-                if pattern.search(line_to_check):
+                if pattern.search(line_newline_stripped):
                     if rule.get("exclude_pattern"):
-                        if re.search(rule['exclude_pattern'], line_to_check):
+                        if re.search(rule['exclude_pattern'], line_newline_stripped):
                             continue
                     self.print_error(rule, line, identifier, color, fn, i+1)
                     ok = False
@@ -177,8 +168,8 @@ class RuleList:
         firstline = None
         lastLine = None
         if line_tups:
-            # line_fully_stripped for the first line.
-            firstline = line_tups[0][3]
+            # line_newline_stripped for the first line.
+            firstline = line_tups[0][2]
             lastLine = line_tups[-1][1]
 
         if firstline:

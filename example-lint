@@ -41,7 +41,6 @@ def run() -> None:
             langs=file_types,
             rules=[{
                 'pattern': r'\s+$',
-                'strip': '\n',
                 'description': 'Fix trailing whitespace'
             }]
         )
