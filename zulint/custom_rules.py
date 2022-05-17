@@ -25,12 +25,10 @@ class RuleList:
         self,
         langs: Sequence[str],
         rules: Sequence[Rule],
-        shebang_rules: Sequence[Rule] = [],
         exclude_files_in: Optional[str] = None,
     ) -> None:
         self.langs = langs
         self.rules = rules
-        self.shebang_rules = shebang_rules
         # Exclude the files in this folder from rules
         self.exclude_files_in = "\\"
         self.verbose = False
@@ -152,18 +150,6 @@ class RuleList:
             )
             if not ok:
                 failed = True
-
-        # TODO: Move the below into more of a framework.
-        firstline = (
-            contents[: line_starts[1]] if len(line_starts) > 1 else contents
-        ).strip()
-
-        if firstline:
-            shebang_rules_to_apply = self.get_rules_applying_to_fn(fn=fn, rules=self.shebang_rules)
-            for rule in shebang_rules_to_apply:
-                if re.search(rule['pattern'], firstline):
-                    self.print_error(rule, firstline, identifier, color, fn, 1)
-                    failed = True
 
         if contents and not contents.endswith("\n"):
             print("No newline at the end of file. Fix with `sed -i '$a\\' %s`" % (fn,))
