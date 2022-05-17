@@ -42,6 +42,9 @@ def run() -> None:
             rules=[{
                 'pattern': r'[\t ]+$',
                 'description': 'Fix trailing whitespace'
+            }, {
+                'pattern': r'[^\n]\Z',
+                'description': 'Missing trailing newline'
             }]
         )
         failed = trailing_whitespace_rule.check(by_lang, verbose=args.verbose)

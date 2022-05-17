@@ -151,10 +151,6 @@ class RuleList:
             if not ok:
                 failed = True
 
-        if contents and not contents.endswith("\n"):
-            print("No newline at the end of file. Fix with `sed -i '$a\\' %s`" % (fn,))
-            failed = True
-
         return failed
 
     def check(self, by_lang: Mapping[str, Sequence[str]], verbose: bool = False) -> bool:
