@@ -16,7 +16,6 @@ Rule = TypedDict("Rule", {
     "include_only": AbstractSet[str],
     "pattern": str,
     "strip": str,
-    "strip_rule": str,
 }, total=False)
 LineTup = Tuple[int, str, str, str]
 
