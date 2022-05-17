@@ -40,7 +40,7 @@ def run() -> None:
         trailing_whitespace_rule = RuleList(
             langs=file_types,
             rules=[{
-                'pattern': r'\s+$',
+                'pattern': r'[\t ]+$',
                 'description': 'Fix trailing whitespace'
             }]
         )

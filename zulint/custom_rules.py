@@ -1,5 +1,5 @@
+import bisect
 import re
-import traceback
 from typing import AbstractSet, List, Mapping, Optional, Sequence, Tuple
 
 from typing_extensions import TypedDict
@@ -16,7 +16,6 @@ Rule = TypedDict("Rule", {
     "include_only": AbstractSet[str],
     "pattern": str,
 }, total=False)
-LineTup = Tuple[int, str, str]
 
 
 class RuleList:
@@ -35,17 +34,6 @@ class RuleList:
         # Exclude the files in this folder from rules
         self.exclude_files_in = "\\"
         self.verbose = False
-
-    def get_line_info_from_file(self, fn: str) -> List[LineTup]:
-        line_tups = []
-        with open(fn, encoding='utf8') as f:
-            for i, line in enumerate(f):
-                line_newline_stripped = line.strip('\n')
-                if line_newline_stripped.endswith('  # nolint'):
-                    continue
-                tup = (i, line, line_newline_stripped)
-                line_tups.append(tup)
-        return line_tups
 
     def get_rules_applying_to_fn(self, fn: str, rules: Sequence[Rule]) -> List[Rule]:
         rules_to_apply = []
@@ -71,7 +59,8 @@ class RuleList:
     def check_file_for_pattern(
         self,
         fn: str,
-        line_tups: Sequence[LineTup],
+        contents: str,
+        line_starts: Sequence[int],
         identifier: str,
         color: str,
         rule: Rule,
@@ -81,9 +70,6 @@ class RuleList:
         DO NOT MODIFY THIS FUNCTION WITHOUT PROFILING.
 
         This function gets called ~40k times, once per file per regex.
-
-        Inside it's doing a regex check for every line in the file, so
-        it's important to do things like pre-compiling regexes.
 
         DO NOT INLINE THIS FUNCTION.
 
@@ -97,23 +83,23 @@ class RuleList:
         }
         unmatched_exclude_lines = exclude_lines.copy()
 
-        pattern = re.compile(rule['pattern'])
-
         ok = True
-        for (i, line, line_newline_stripped) in line_tups:
-            if line_newline_stripped in exclude_lines:
-                unmatched_exclude_lines.discard(line_newline_stripped)
+        for m in re.finditer(rule["pattern"], contents, re.M):
+            i = bisect.bisect(line_starts, m.start()) - 1
+            line = contents[
+                line_starts[i] : line_starts[i + 1]
+                if i + 1 < len(line_starts)
+                else None
+            ]
+            line_fully_stripped = line.strip()
+            if line_fully_stripped in exclude_lines:
+                unmatched_exclude_lines.discard(line_fully_stripped)
                 continue
-            try:
-                if pattern.search(line_newline_stripped):
-                    if rule.get("exclude_pattern"):
-                        if re.search(rule['exclude_pattern'], line_newline_stripped):
-                            continue
-                    self.print_error(rule, line, identifier, color, fn, i+1)
-                    ok = False
-            except Exception:
-                print("Exception with %s at %s line %s" % (rule['pattern'], fn, i+1))
-                traceback.print_exc()
+            if rule.get("exclude_pattern"):
+                if re.search(rule["exclude_pattern"], line_fully_stripped):
+                    continue
+            self.print_error(rule, line, identifier, color, fn, i+1)
+            ok = False
 
         if unmatched_exclude_lines:
             print('Please remove exclusions for file %s: %s' % (fn, unmatched_exclude_lines))
@@ -149,14 +135,17 @@ class RuleList:
     ) -> bool:
         failed = False
 
-        line_tups = self.get_line_info_from_file(fn=fn)
+        with open(fn, encoding="utf8") as f:
+            contents = f.read()
+        line_starts = [m.start() for m in re.finditer(r"^.", contents, re.M | re.S)]
 
         rules_to_apply = self.get_rules_applying_to_fn(fn=fn, rules=self.rules)
 
         for rule in rules_to_apply:
             ok = self.check_file_for_pattern(
                 fn=fn,
-                line_tups=line_tups,
+                contents=contents,
+                line_starts=line_starts,
                 identifier=identifier,
                 color=color,
                 rule=rule,
@@ -165,12 +154,9 @@ class RuleList:
                 failed = True
 
         # TODO: Move the below into more of a framework.
-        firstline = None
-        lastLine = None
-        if line_tups:
-            # line_newline_stripped for the first line.
-            firstline = line_tups[0][2]
-            lastLine = line_tups[-1][1]
+        firstline = (
+            contents[: line_starts[1]] if len(line_starts) > 1 else contents
+        ).strip()
 
         if firstline:
             shebang_rules_to_apply = self.get_rules_applying_to_fn(fn=fn, rules=self.shebang_rules)
@@ -179,7 +165,7 @@ class RuleList:
                     self.print_error(rule, firstline, identifier, color, fn, 1)
                     failed = True
 
-        if lastLine and ('\n' not in lastLine):
+        if contents and not contents.endswith("\n"):
             print("No newline at the end of file. Fix with `sed -i '$a\\' %s`" % (fn,))
             failed = True
 
