@@ -27,26 +27,15 @@ class RuleList:
         self,
         langs: Sequence[str],
         rules: Sequence[Rule],
-        max_length: Optional[int] = None,
-        length_exclude: AbstractSet[str] = set(),
         shebang_rules: Sequence[Rule] = [],
         exclude_files_in: Optional[str] = None,
-        exclude_max_length_fns: Sequence[str] = [],
-        exclude_max_length_line_patterns: Sequence[str] = [],
     ) -> None:
         self.langs = langs
         self.rules = rules
-        self.max_length = max_length
-        self.length_exclude = length_exclude
         self.shebang_rules = shebang_rules
         # Exclude the files in this folder from rules
         self.exclude_files_in = "\\"
         self.verbose = False
-
-        # Exclude some file names and line patterns from max line length
-        # These defaults are from https://github.com/zulip/zulip repository.
-        self.exclude_max_length_fns = exclude_max_length_fns
-        self.exclude_max_length_line_patterns = exclude_max_length_line_patterns
 
     def get_line_info_from_file(self, fn: str) -> List[LineTup]:
         line_tups = []
@@ -161,28 +150,11 @@ class RuleList:
                     (YELLOW + " | " + MAGENTA).join(rule['bad_lines']), ENDC))
             print_err(identifier, color, "")
 
-    def check_file_for_long_lines(
-        self,
-        fn: str,
-        max_length: int,
-        line_tups: Sequence[LineTup]
-    ) -> bool:
-        ok = True
-        for (i, line, line_newline_stripped, line_fully_stripped) in line_tups:
-            line_length = len(line)
-            if (line_length > max_length and
-                not re.findall(r'|'.join(self.exclude_max_length_fns), fn) and
-                not re.findall(r'|'.join(self.exclude_max_length_line_patterns), line)):
-                print("Line too long (%s) at %s line %s: %s" % (len(line), fn, i+1, line_newline_stripped))
-                ok = False
-        return ok
-
     def custom_check_file(
         self,
         fn: str,
         identifier: str,
         color: str,
-        max_length: Optional[int] = None,
     ) -> bool:
         failed = False
 
@@ -208,15 +180,6 @@ class RuleList:
             # line_fully_stripped for the first line.
             firstline = line_tups[0][3]
             lastLine = line_tups[-1][1]
-
-        if max_length is not None:
-            ok = self.check_file_for_long_lines(
-                fn=fn,
-                max_length=max_length,
-                line_tups=line_tups,
-            )
-            if not ok:
-                failed = True
 
         if firstline:
             shebang_rules_to_apply = self.get_rules_applying_to_fn(fn=fn, rules=self.shebang_rules)
@@ -253,10 +216,7 @@ class RuleList:
                     #
                     # TODO: Migrate this to looking at __module__ type attributes.
                     continue
-                max_length = None
-                if fn not in self.length_exclude:
-                    max_length = self.max_length
-                if self.custom_check_file(fn, lang, color, max_length=max_length):
+                if self.custom_check_file(fn, lang, color):
                     failed = True
 
         return failed
