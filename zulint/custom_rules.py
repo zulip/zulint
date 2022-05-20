@@ -134,7 +134,12 @@ class RuleList:
         failed = False
 
         with open(fn, encoding="utf8") as f:
-            contents = f.read()
+            try:
+                contents = f.read()
+            except UnicodeDecodeError as e:
+                print(f"unable to process file {fn} due to unicode decode error")
+                print(e)
+                return True
         line_starts = [m.start() for m in re.finditer(r"^.", contents, re.M | re.S)]
 
         rules_to_apply = self.get_rules_applying_to_fn(fn=fn, rules=self.rules)
