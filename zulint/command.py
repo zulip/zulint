@@ -2,6 +2,7 @@ import argparse
 import logging
 import multiprocessing
 import sys
+import time
 import weakref
 from typing import Callable, Dict, List, Mapping, NoReturn, Sequence, Set, Tuple, Union
 
@@ -57,9 +58,11 @@ run_parallel_functions = weakref.WeakValueDictionary()  # type: weakref.WeakValu
 def run_parallel_worker(item: Tuple[str, int]) -> Tuple[str, int]:
     name, func_id = item
     func = run_parallel_functions[func_id]
-    logging.info("start " + name)
+    logging.info("start {}".format(name))
+    time_start = time.perf_counter()
     result = func()
-    logging.info("finish " + name)
+    time_end = time.perf_counter()
+    logging.info("finish {}; elapsed time: {}".format(name, time_end - time_start))
     sys.stdout.flush()
     sys.stderr.flush()
     return name, result
