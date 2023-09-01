@@ -8,7 +8,7 @@ from typing import List
 
 from zulint import lister
 
-EXCLUDE_FILES = []  # type: List[str]
+EXCLUDE_FILES: List[str] = []
 
 TOOLS_DIR = os.path.dirname(os.path.abspath(__file__))
 os.chdir(os.path.dirname(TOOLS_DIR))
