@@ -22,10 +22,10 @@ def run() -> None:
     # eg: file_types = ['py', 'html', 'css', 'js']
     file_types = ['py']
 
-    EXCLUDED_FILES = [
+    EXCLUDED_FILES: List[str] = [
         # No linters will be run on files in this list.
         # eg: 'path/to/file.py'
-    ]  # type: List[str]
+    ]
     by_lang = linter_config.list_files(file_types, exclude=EXCLUDED_FILES)
 
     linter_config.external_linter('mypy', [sys.executable, 'tools/run-mypy'], ['py'], pass_targets=False,
@@ -52,11 +52,11 @@ def run() -> None:
 
     @linter_config.lint
     def pyflakes() -> int:
-        suppress_patterns = [
+        suppress_patterns: List[Tuple[str, str]] = [
             # Error patters in this list will be will not be reported by the linter.
             # syntax: ('File Path', 'Error message')
             # eg: ('path/to/file.py', 'imported but unused')
-        ]  # type: List[Tuple[str, str]]
+        ]
         failed = run_pyflakes(by_lang['py'], args, suppress_patterns)
         return 1 if failed else 0
 
