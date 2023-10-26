@@ -67,7 +67,9 @@ def split_arg_into_list(arg: str) -> List[str]:
     return [linter for linter in arg.split(",")]
 
 
-run_parallel_functions = weakref.WeakValueDictionary()  # type: weakref.WeakValueDictionary[int, Callable[[], int]]
+run_parallel_functions: "weakref.WeakValueDictionary[int, Callable[[], int]]" = (
+    weakref.WeakValueDictionary()
+)
 
 
 def run_parallel_worker(item: Tuple[str, int]) -> Tuple[str, int]:
@@ -106,14 +108,14 @@ def run_parallel(
 
 
 class LinterConfig:
-    lint_functions = {}  # type: Dict[str, Callable[[], int]]
-    lint_descriptions = {}  # type: Dict[str, str]
-    fixable_linters = set()  # type: Set[str]
+    lint_functions: Dict[str, Callable[[], int]] = {}
+    lint_descriptions: Dict[str, str] = {}
+    fixable_linters: Set[str] = set()
 
     def __init__(self, args: argparse.Namespace) -> None:
         self.args = args
-        self.by_lang = {}  # type: Dict[str, List[str]]
-        self.groups = {}  # type: Mapping[str, Sequence[str]]
+        self.by_lang: Dict[str, List[str]] = {}
+        self.groups: Mapping[str, Sequence[str]] = {}
 
     def list_files(
         self,
@@ -176,7 +178,7 @@ class LinterConfig:
         color = next(colors)
 
         def run_linter() -> int:
-            targets = []  # type: List[str]
+            targets: List[str] = []
             if len(target_langs) != 0:
                 targets = [
                     target for lang in target_langs for target in self.by_lang[lang]

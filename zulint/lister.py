@@ -123,8 +123,8 @@ def list_files(
     # throw away non-files (like symlinks)
     files = [f for f in files if not os.path.islink(f) and os.path.isfile(f)]
 
-    result_dict = defaultdict(list)  # type: Dict[str, List[str]]
-    result_list = []  # type: List[str]
+    result_dict: Dict[str, List[str]] = defaultdict(list)
+    result_list: List[str] = []
 
     for fpath in files:
         # this will take a long time if exclude is very large
