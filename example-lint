@@ -41,6 +41,13 @@ def run() -> None:
         fix_arg="--fix",
         description="Python linter",
     )
+    linter_config.external_linter(
+        "ruff-format",
+        ["ruff", "format", "--quiet"],
+        ["py"],
+        check_arg="--check",
+        description="Python linter",
+    )
 
     @linter_config.lint
     def check_custom_rules() -> int:
