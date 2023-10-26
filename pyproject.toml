@@ -1,0 +1,3 @@
+[tool.isort]
+src_paths = ["."]
+profile = "black"
