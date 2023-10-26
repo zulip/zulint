@@ -157,5 +157,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
     listing = list_files(targets=args.targets, ftypes=args.ftypes, use_shebang=not args.extonly,
                          modified_only=args.modified, exclude=args.exclude, extless_only=args.extless_only)
-    for l in listing:
-        print(l)
+    for path in listing:
+        print(path)
