@@ -108,14 +108,13 @@ def run_parallel(
 
 
 class LinterConfig:
-    lint_functions: Dict[str, Callable[[], int]] = {}
-    lint_descriptions: Dict[str, str] = {}
-    fixable_linters: Set[str] = set()
-
     def __init__(self, args: argparse.Namespace) -> None:
         self.args = args
         self.by_lang: Dict[str, List[str]] = {}
         self.groups: Mapping[str, Sequence[str]] = {}
+        self.lint_functions: Dict[str, Callable[[], int]] = {}
+        self.lint_descriptions: Dict[str, str] = {}
+        self.fixable_linters: Set[str] = set()
 
     def list_files(
         self,
