@@ -21,11 +21,11 @@ def run() -> None:
     # eg: file_types = ['py', 'html', 'css', 'js']
     file_types = ["py"]
 
-    EXCLUDED_FILES: List[str] = [
+    excluded_files: List[str] = [
         # No linters will be run on files in this list.
         # eg: 'path/to/file.py'
     ]
-    by_lang = linter_config.list_files(file_types, exclude=EXCLUDED_FILES)
+    by_lang = linter_config.list_files(file_types, exclude=excluded_files)
 
     linter_config.external_linter(
         "mypy",

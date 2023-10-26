@@ -15,7 +15,7 @@ os.chdir(os.path.dirname(TOOLS_DIR))
 
 sys.path.append(os.path.dirname(TOOLS_DIR))
 
-parser = argparse.ArgumentParser(description="Run mypy on files tracked" " by git.")
+parser = argparse.ArgumentParser(description="Run mypy on files tracked by git.")
 
 parser.add_argument(
     "targets",

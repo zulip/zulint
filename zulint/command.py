@@ -64,7 +64,7 @@ def add_default_linter_arguments(parser: argparse.ArgumentParser) -> None:
 
 
 def split_arg_into_list(arg: str) -> List[str]:
-    return [linter for linter in arg.split(",")]
+    return arg.split(",")
 
 
 run_parallel_functions: "weakref.WeakValueDictionary[int, Callable[[], int]]" = (
@@ -75,11 +75,11 @@ run_parallel_functions: "weakref.WeakValueDictionary[int, Callable[[], int]]" = 
 def run_parallel_worker(item: Tuple[str, int]) -> Tuple[str, int]:
     name, func_id = item
     func = run_parallel_functions[func_id]
-    logging.info("start {}".format(name))
+    logging.info("start %s", name)
     time_start = time.perf_counter()
     result = func()
     time_end = time.perf_counter()
-    logging.info("finish {}; elapsed time: {}".format(name, time_end - time_start))
+    logging.info("finish %s; elapsed time: %g", name, time_end - time_start)
     sys.stdout.flush()
     sys.stderr.flush()
     return name, result
@@ -221,7 +221,7 @@ class LinterConfig:
         if self.args.list:
             print("{}{:<15} {} {}".format(BOLDRED, "Linter", "Description", ENDC))
             for linter, desc in self.lint_descriptions.items():
-                print("{}{:<15} {}{}{}".format(BLUE, linter, GREEN, desc, ENDC))
+                print(f"{BLUE}{linter:<15} {GREEN}{desc}{ENDC}")
             sys.exit()
         if self.args.list_groups:
             print("{}{:<15} {} {}".format(BOLDRED, "Linter Group", "File types", ENDC))
@@ -237,7 +237,7 @@ class LinterConfig:
         jobs = self.args.jobs
         if self.args.fix:
             # Do not run multiple fixers in parallel, since they might
-            # race with each other and corrupt each other’s output.
+            # race with each other and corrupt each other's output.
             jobs = 1
 
         failed_linters = run_parallel(self.lint_functions, jobs)

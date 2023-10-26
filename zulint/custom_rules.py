@@ -6,20 +6,16 @@ from typing_extensions import TypedDict
 
 from zulint.printer import BLUE, ENDC, GREEN, MAGENTA, YELLOW, colors, print_err
 
-Rule = TypedDict(
-    "Rule",
-    {
-        "bad_lines": Sequence[str],
-        "description": str,
-        "exclude": AbstractSet[str],
-        "exclude_line": AbstractSet[Tuple[str, str]],
-        "exclude_pattern": str,
-        "good_lines": Sequence[str],
-        "include_only": AbstractSet[str],
-        "pattern": str,
-    },
-    total=False,
-)
+
+class Rule(TypedDict, total=False):
+    bad_lines: Sequence[str]
+    description: str
+    exclude: AbstractSet[str]
+    exclude_line: AbstractSet[Tuple[str, str]]
+    exclude_pattern: str
+    good_lines: Sequence[str]
+    include_only: AbstractSet[str]
+    pattern: str
 
 
 class RuleList:
@@ -96,17 +92,15 @@ class RuleList:
             if line_fully_stripped in exclude_lines:
                 unmatched_exclude_lines.discard(line_fully_stripped)
                 continue
-            if rule.get("exclude_pattern"):
-                if re.search(rule["exclude_pattern"], line_fully_stripped):
-                    continue
+            if rule.get("exclude_pattern") and re.search(
+                rule["exclude_pattern"], line_fully_stripped
+            ):
+                continue
             self.print_error(rule, line, identifier, color, fn, i + 1)
             ok = False
 
         if unmatched_exclude_lines:
-            print(
-                "Please remove exclusions for file %s: %s"
-                % (fn, unmatched_exclude_lines)
-            )
+            print("Please remove exclusions for file {fn}: {unmatched_exclude_lines}")
 
         return ok
 

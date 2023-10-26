@@ -26,10 +26,8 @@ def run_command(
             try:
                 signal_name = signal.Signals(-p.returncode).name
             except (AttributeError, ValueError):
-                signal_name = "signal {}".format(-p.returncode)
-            print_err(
-                name, color, "{} terminated by {}".format(command[0], signal_name)
-            )
+                signal_name = f"signal {-p.returncode}"
+            print_err(name, color, f"{command[0]} terminated by {signal_name}")
         return p.returncode
 
 

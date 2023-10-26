@@ -5,7 +5,53 @@ profile = "black"
 [tool.ruff]
 # See https://github.com/charliermarsh/ruff#rules for error code definitions.
 select = [
+    "ANN", # annotations
+    "B", # bugbear
+    "BLE", # blind except
+    "C4", # comprehensions
+    "COM", # trailing comma
+    "DTZ", # naive datetime
+    "E", # style errors
+    "EXE", # shebang
+    "F", # flakes
+    "FLY", # string formatting
+    "FURB", # refurb
+    "G", # logging format
     "I", # import sorting
+    "ICN", # import conventions
+    "INT", # gettext
+    "ISC", # string concatenation
+    "LOG", # logging
+    "N", # naming
+    "PERF", # performance
+    "PGH", # pygrep-hooks
+    "PIE", # miscellaneous
+    "PL", # pylint
+    "PYI", # typing stubs
+    "Q", # quotes
+    "RET", # return
+    "RSE", # raise
+    "RUF", # Ruff
+    "S", # security
+    "SLF", # self
+    "SLOT", # slots
+    "SIM", # simplify
+    "T10", # debugger
+    "TID", # tidy imports
+    "TRY", # try
+    "UP", # upgrade
+    "W", # style warnings
+    "YTT", # sys.version
+]
+extend-ignore = [
+    "ANN101", # Missing type annotation for `self` in method
+    "COM812", # Trailing comma missing
+    "E501", # Line too long
+    "PLR0911", # Too many return statements
+    "PLR0913", # Too many arguments in function definition
+    "S101", # Use of `assert` detected
+    "S603", # `subprocess` call: check for execution of untrusted input
+    "S607", # Starting a process with a partial executable path
 ]
 src = ["."]
 target-version = "py38"

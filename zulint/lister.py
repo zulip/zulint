@@ -15,32 +15,31 @@ def get_ftype(fpath: str, use_shebang: bool) -> str:
     ext = os.path.splitext(fpath)[1]
     if ext:
         return ext[1:]
-    elif use_shebang:
+
+    if use_shebang:
         # opening a file may throw an OSError
         with open(fpath, encoding="utf8") as f:
             first_line = f.readline()
             if re.search(r"^#!.*\bpython", first_line):
                 return "py"
-            elif re.search(r"^#!.*sh", first_line):
+            if re.search(r"^#!.*sh", first_line):
                 return "sh"
-            elif re.search(r"^#!.*\bperl", first_line):
+            if re.search(r"^#!.*\bperl", first_line):
                 return "pl"
-            elif re.search(r"^#!.*\bnode", first_line):
+            if re.search(r"^#!.*\bnode", first_line):
                 return "js"
-            elif re.search(r"^#!.*\bruby", first_line):
+            if re.search(r"^#!.*\bruby", first_line):
                 return "rb"
-            elif re.search(r"^#!.*\btail", first_line):
+            if re.search(r"^#!.*\btail", first_line):
                 return ""  # do not lint these scripts.
-            elif re.search(r"^#!", first_line):
+            if re.search(r"^#!", first_line):
                 print(
-                    'Error: Unknown shebang in file "%s":\n%s' % (fpath, first_line),
+                    f'Error: Unknown shebang in file "{path}":\n{first_line}',
                     file=sys.stderr,
                 )
                 return ""
-            else:
-                return ""
-    else:
-        return ""
+
+    return ""
 
 
 @overload
@@ -144,7 +143,7 @@ def list_files(
             except (OSError, UnicodeDecodeError) as e:
                 etype = e.__class__.__name__
                 print(
-                    'Error: %s while determining type of file "%s":' % (etype, fpath),
+                    f'Error: {etype} while determining type of file "{fpath}":',
                     file=sys.stderr,
                 )
                 print(e, file=sys.stderr)
@@ -159,8 +158,7 @@ def list_files(
 
     if group_by_ftype:
         return result_dict
-    else:
-        return result_list
+    return result_list
 
 
 if __name__ == "__main__":
