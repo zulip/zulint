@@ -6,16 +6,20 @@ from typing_extensions import TypedDict
 
 from zulint.printer import BLUE, ENDC, GREEN, MAGENTA, YELLOW, colors, print_err
 
-Rule = TypedDict("Rule", {
-    "bad_lines": Sequence[str],
-    "description": str,
-    "exclude": AbstractSet[str],
-    "exclude_line": AbstractSet[Tuple[str, str]],
-    "exclude_pattern": str,
-    "good_lines": Sequence[str],
-    "include_only": AbstractSet[str],
-    "pattern": str,
-}, total=False)
+Rule = TypedDict(
+    "Rule",
+    {
+        "bad_lines": Sequence[str],
+        "description": str,
+        "exclude": AbstractSet[str],
+        "exclude_line": AbstractSet[Tuple[str, str]],
+        "exclude_pattern": str,
+        "good_lines": Sequence[str],
+        "include_only": AbstractSet[str],
+        "pattern": str,
+    },
+    total=False,
+)
 
 
 class RuleList:
@@ -37,7 +41,7 @@ class RuleList:
         rules_to_apply = []
         for rule in rules:
             excluded = False
-            for item in rule.get('exclude', set()):
+            for item in rule.get("exclude", set()):
                 if fn.startswith(item):
                     excluded = True
                     break
@@ -63,8 +67,7 @@ class RuleList:
         color: str,
         rule: Rule,
     ) -> bool:
-
-        '''
+        """
         DO NOT MODIFY THIS FUNCTION WITHOUT PROFILING.
 
         This function gets called ~40k times, once per file per regex.
@@ -73,10 +76,10 @@ class RuleList:
 
         We need to see it show up in profiles, and the function call
         overhead will never be a bottleneck.
-        '''
+        """
         exclude_lines = {
-            line for
-            (exclude_fn, line) in rule.get('exclude_line', set())
+            line
+            for (exclude_fn, line) in rule.get("exclude_line", set())
             if exclude_fn == fn
         }
         unmatched_exclude_lines = exclude_lines.copy()
@@ -96,11 +99,14 @@ class RuleList:
             if rule.get("exclude_pattern"):
                 if re.search(rule["exclude_pattern"], line_fully_stripped):
                     continue
-            self.print_error(rule, line, identifier, color, fn, i+1)
+            self.print_error(rule, line, identifier, color, fn, i + 1)
             ok = False
 
         if unmatched_exclude_lines:
-            print('Please remove exclusions for file %s: %s' % (fn, unmatched_exclude_lines))
+            print(
+                "Please remove exclusions for file %s: %s"
+                % (fn, unmatched_exclude_lines)
+            )
 
         return ok
 
@@ -113,16 +119,33 @@ class RuleList:
         fn: str,
         line_number: int,
     ) -> None:
-        print_err(identifier, color, '{} {}at {} line {}:'.format(
-            YELLOW + rule['description'], BLUE, fn, line_number))
+        print_err(
+            identifier,
+            color,
+            "{} {}at {} line {}:".format(
+                YELLOW + rule["description"], BLUE, fn, line_number
+            ),
+        )
         print_err(identifier, color, line)
         if self.verbose:
-            if rule.get('good_lines'):
-                print_err(identifier, color, GREEN + "  Good code: {}{}".format(
-                    (YELLOW + " | " + GREEN).join(rule['good_lines']), ENDC))
-            if rule.get('bad_lines'):
-                print_err(identifier, color, MAGENTA + "  Bad code:  {}{}".format(
-                    (YELLOW + " | " + MAGENTA).join(rule['bad_lines']), ENDC))
+            if rule.get("good_lines"):
+                print_err(
+                    identifier,
+                    color,
+                    GREEN
+                    + "  Good code: {}{}".format(
+                        (YELLOW + " | " + GREEN).join(rule["good_lines"]), ENDC
+                    ),
+                )
+            if rule.get("bad_lines"):
+                print_err(
+                    identifier,
+                    color,
+                    MAGENTA
+                    + "  Bad code:  {}{}".format(
+                        (YELLOW + " | " + MAGENTA).join(rule["bad_lines"]), ENDC
+                    ),
+                )
             print_err(identifier, color, "")
 
     def custom_check_file(
@@ -153,7 +176,9 @@ class RuleList:
 
         return failed
 
-    def check(self, by_lang: Mapping[str, Sequence[str]], verbose: bool = False) -> bool:
+    def check(
+        self, by_lang: Mapping[str, Sequence[str]], verbose: bool = False
+    ) -> bool:
         # By default, a rule applies to all files within the extension for
         # which it is specified (e.g. all .py files)
         # There are three operators we can use to manually include or exclude files from linting for a rule:
@@ -169,7 +194,7 @@ class RuleList:
         for lang in self.langs:
             color = next(colors)
             for fn in by_lang[lang]:
-                if fn.startswith(self.exclude_files_in) or ('custom_check.py' in fn):
+                if fn.startswith(self.exclude_files_in) or ("custom_check.py" in fn):
                     # This is a bit of a hack, but it generally really doesn't
                     # work to check the file that defines all the things to check for.
                     #

@@ -27,7 +27,9 @@ def run_command(
                 signal_name = signal.Signals(-p.returncode).name
             except (AttributeError, ValueError):
                 signal_name = "signal {}".format(-p.returncode)
-            print_err(name, color, "{} terminated by {}".format(command[0], signal_name))
+            print_err(
+                name, color, "{} terminated by {}".format(command[0], signal_name)
+            )
         return p.returncode
 
 
@@ -54,7 +56,7 @@ def run_pyflakes(
     failed = False
     color = next(colors)
     with subprocess.Popen(
-        ['pyflakes', '--', *files],
+        ["pyflakes", "--", *files],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         universal_newlines=True,
@@ -71,6 +73,6 @@ def run_pyflakes(
 
         for ln in pyflakes.stdout.readlines() + pyflakes.stderr.readlines():
             if not suppress_line(ln):
-                print_err('pyflakes', color, ln)
+                print_err("pyflakes", color, ln)
                 failed = True
     return failed

@@ -19,7 +19,7 @@ def run() -> None:
 
     # Linters will be run on these file types.
     # eg: file_types = ['py', 'html', 'css', 'js']
-    file_types = ['py']
+    file_types = ["py"]
 
     EXCLUDED_FILES: List[str] = [
         # No linters will be run on files in this list.
@@ -27,29 +27,36 @@ def run() -> None:
     ]
     by_lang = linter_config.list_files(file_types, exclude=EXCLUDED_FILES)
 
-    linter_config.external_linter('mypy', [sys.executable, 'tools/run-mypy'], ['py'], pass_targets=False,
-                                  description="Static type checker for Python")
-    linter_config.external_linter('ruff', ['ruff', 'check', '--quiet'], ['py'],
-                                  fix_arg='--fix',
-                                  description="Python linter")
+    linter_config.external_linter(
+        "mypy",
+        [sys.executable, "tools/run-mypy"],
+        ["py"],
+        pass_targets=False,
+        description="Static type checker for Python",
+    )
+    linter_config.external_linter(
+        "ruff",
+        ["ruff", "check", "--quiet"],
+        ["py"],
+        fix_arg="--fix",
+        description="Python linter",
+    )
 
     @linter_config.lint
     def check_custom_rules() -> int:
         """Check trailing whitespace for specified files"""
         trailing_whitespace_rule = RuleList(
             langs=file_types,
-            rules=[{
-                'pattern': r'[\t ]+$',
-                'description': 'Fix trailing whitespace'
-            }, {
-                'pattern': r'[^\n]\Z',
-                'description': 'Missing trailing newline'
-            }]
+            rules=[
+                {"pattern": r"[\t ]+$", "description": "Fix trailing whitespace"},
+                {"pattern": r"[^\n]\Z", "description": "Missing trailing newline"},
+            ],
         )
         failed = trailing_whitespace_rule.check(by_lang, verbose=args.verbose)
         return 1 if failed else 0
 
     linter_config.do_lint()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     run()
