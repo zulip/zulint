@@ -29,9 +29,6 @@ def run() -> None:
 
     linter_config.external_linter('mypy', [sys.executable, 'tools/run-mypy'], ['py'], pass_targets=False,
                                   description="Static type checker for Python")
-    linter_config.external_linter('isort', ['isort'], ['py'],
-                                  check_arg=['--check-only', '--diff'],
-                                  description="Sorts Python import statements")
     linter_config.external_linter('ruff', ['ruff', 'check', '--quiet'], ['py'],
                                   fix_arg='--fix',
                                   description="Python linter")
