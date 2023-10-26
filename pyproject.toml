@@ -1,3 +1,7 @@
 [tool.isort]
 src_paths = ["."]
 profile = "black"
+
+[tool.ruff]
+src = ["."]
+target-version = "py38"

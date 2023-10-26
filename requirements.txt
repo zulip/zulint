@@ -1,3 +1,4 @@
 -e .
 isort
 mypy
+ruff~=0.1.3

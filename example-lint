@@ -2,11 +2,10 @@
 
 import argparse
 import sys
-from typing import List, Tuple
+from typing import List
 
 from zulint.command import LinterConfig, add_default_linter_arguments
 from zulint.custom_rules import RuleList
-from zulint.linters import run_pyflakes
 
 
 def run() -> None:
@@ -33,6 +32,9 @@ def run() -> None:
     linter_config.external_linter('isort', ['isort'], ['py'],
                                   check_arg=['--check-only', '--diff'],
                                   description="Sorts Python import statements")
+    linter_config.external_linter('ruff', ['ruff', 'check', '--quiet'], ['py'],
+                                  fix_arg='--fix',
+                                  description="Python linter")
 
     @linter_config.lint
     def check_custom_rules() -> int:
@@ -48,16 +50,6 @@ def run() -> None:
             }]
         )
         failed = trailing_whitespace_rule.check(by_lang, verbose=args.verbose)
-        return 1 if failed else 0
-
-    @linter_config.lint
-    def pyflakes() -> int:
-        suppress_patterns: List[Tuple[str, str]] = [
-            # Error patters in this list will be will not be reported by the linter.
-            # syntax: ('File Path', 'Error message')
-            # eg: ('path/to/file.py', 'imported but unused')
-        ]
-        failed = run_pyflakes(by_lang['py'], args, suppress_patterns)
         return 1 if failed else 0
 
     linter_config.do_lint()
