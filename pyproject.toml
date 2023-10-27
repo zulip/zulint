@@ -2,6 +2,20 @@
 src_paths = ["."]
 profile = "black"
 
+[tool.mypy]
+strict = true
+enable_error_code = [
+    "redundant-self",
+    "redundant-expr",
+    "possibly-undefined",
+    "truthy-bool",
+    "truthy-iterable",
+    "ignore-without-code",
+    "unused-awaitable",
+    "explicit-override",
+]
+warn_unreachable = true
+
 [tool.ruff]
 # See https://github.com/charliermarsh/ruff#rules for error code definitions.
 select = [

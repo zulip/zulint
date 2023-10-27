@@ -137,19 +137,22 @@ def list_files(
         ):
             continue
 
-        if ftypes or group_by_ftype:
-            try:
-                filetype = get_ftype(fpath, use_shebang)
-            except (OSError, UnicodeDecodeError) as e:
-                etype = e.__class__.__name__
-                print(
-                    f'Error: {etype} while determining type of file "{fpath}":',
-                    file=sys.stderr,
-                )
-                print(e, file=sys.stderr)
-                filetype = ""
-            if ftypes and filetype not in ftypes_set:
-                continue
+        if not ftypes and not group_by_ftype:
+            result_list.append(fpath)
+            continue
+
+        try:
+            filetype = get_ftype(fpath, use_shebang)
+        except (OSError, UnicodeDecodeError) as e:
+            etype = e.__class__.__name__
+            print(
+                f'Error: {etype} while determining type of file "{fpath}":',
+                file=sys.stderr,
+            )
+            print(e, file=sys.stderr)
+            filetype = ""
+        if ftypes and filetype not in ftypes_set:
+            continue
 
         if group_by_ftype:
             result_dict[filetype].append(fpath)
