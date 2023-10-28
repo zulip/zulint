@@ -36,13 +36,11 @@ select = [
     "EXE", # shebang
     "F", # flakes
     "FLY", # string formatting
-    "FURB", # refurb
     "G", # logging format
     "I", # import sorting
     "ICN", # import conventions
     "INT", # gettext
     "ISC", # string concatenation
-    "LOG", # logging
     "N", # naming
     "PERF", # performance
     "PGH", # pygrep-hooks
