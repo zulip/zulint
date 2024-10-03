@@ -100,7 +100,7 @@ class RuleList:
             ok = False
 
         if unmatched_exclude_lines:
-            print("Please remove exclusions for file {fn}: {unmatched_exclude_lines}")
+            print(f"Please remove exclusions for file {fn}: {unmatched_exclude_lines}")
 
         return ok
 
