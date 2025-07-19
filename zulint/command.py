@@ -245,8 +245,8 @@ class LinterConfig:
         failed_fixable_linters = failed_linters & self.fixable_linters
         if failed_fixable_linters:
             print(
-                "Run {}{} --fix{} to fix errors for the following linters: {}".format(
-                    BLUE, sys.argv[0], ENDC, ",".join(sorted(failed_fixable_linters))
+                "Run {}{} --fix --only={}{} to autofix.".format(
+                    BLUE, sys.argv[0], ",".join(sorted(failed_fixable_linters)), ENDC
                 ),
             )
 
