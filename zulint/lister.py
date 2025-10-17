@@ -34,7 +34,7 @@ def get_ftype(fpath: str, use_shebang: bool) -> str:
                 return ""  # do not lint these scripts.
             if re.search(r"^#!", first_line):
                 print(
-                    f'Error: Unknown shebang in file "{path}":\n{first_line}',
+                    f'Error: Unknown shebang in file "{fpath}":\n{first_line}',
                     file=sys.stderr,
                 )
                 return ""
