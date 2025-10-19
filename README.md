@@ -26,7 +26,7 @@ It has the following features:
 - Runs the linters in parallel, so you only have to wait for the
   slowest linter.  For Zulip, this is a ~4x performance improvement
   over running our third-party linters in series.
-- Produduces easy-to-read, clear terminal output, with each
+- Produces easy-to-read, clear terminal output, with each
   independent linter given its own color.
 - Can check just modified files, or even as a `pre-commit` hook, only
   checking files that have changed (and only starting linters which
