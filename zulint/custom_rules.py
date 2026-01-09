@@ -82,21 +82,20 @@ class RuleList:
 
         ok = True
         for m in re.finditer(rule["pattern"], contents, re.M):
-            i = bisect.bisect(line_starts, m.start()) - 1
-            line = contents[
-                line_starts[i] : line_starts[i + 1]
-                if i + 1 < len(line_starts)
-                else None
+            i = bisect.bisect_right(line_starts, m.start()) - 1
+            j = bisect.bisect_left(line_starts, m.end())
+            lines = contents[
+                line_starts[i] : line_starts[j] if j < len(line_starts) else None
             ]
-            line_fully_stripped = line.strip()
-            if line_fully_stripped in exclude_lines:
-                unmatched_exclude_lines.discard(line_fully_stripped)
+            lines_stripped = lines.strip()
+            if lines_stripped in exclude_lines:
+                unmatched_exclude_lines.discard(lines_stripped)
                 continue
             if rule.get("exclude_pattern") and re.search(
-                rule["exclude_pattern"], line_fully_stripped
+                rule["exclude_pattern"], lines_stripped
             ):
                 continue
-            self.print_error(rule, line, identifier, color, fn, i + 1)
+            self.print_error(rule, lines, identifier, color, fn, i + 1)
             ok = False
 
         if unmatched_exclude_lines:
@@ -107,7 +106,7 @@ class RuleList:
     def print_error(
         self,
         rule: Rule,
-        line: str,
+        lines: str,
         identifier: str,
         color: str,
         fn: str,
@@ -120,7 +119,8 @@ class RuleList:
                 YELLOW + rule["description"], BLUE, fn, line_number
             ),
         )
-        print_err(identifier, color, line)
+        for line in lines.splitlines():
+            print_err(identifier, color, line)
         if self.verbose:
             if rule.get("good_lines"):
                 print_err(
@@ -152,7 +152,7 @@ class RuleList:
 
         with open(fn, encoding="utf8") as f:
             contents = f.read()
-        line_starts = [m.start() for m in re.finditer(r"^.", contents, re.M | re.S)]
+        line_starts = [m.start() for m in re.finditer(r"^", contents, re.M)]
 
         rules_to_apply = self.get_rules_applying_to_fn(fn=fn, rules=self.rules)
 
