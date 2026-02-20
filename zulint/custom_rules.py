@@ -117,9 +117,7 @@ class RuleList:
                 continue
             if rule.get("exclude_pattern") and re.search(
                 rule["exclude_pattern"],
-                self._get_exclude_context(
-                    contents, line_starts, i, j, rule
-                ),
+                self._get_exclude_context(contents, line_starts, i, j, rule),
             ):
                 continue
             self.print_error(rule, lines, identifier, color, fn, i + 1)

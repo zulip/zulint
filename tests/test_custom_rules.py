@@ -4,7 +4,7 @@ import os
 import tempfile
 from typing import Dict, List
 
-from zulint.custom_rules import Rule, RuleList
+from zulint.custom_rules import RuleList
 
 
 def _write_temp_file(content: str) -> str:
@@ -196,7 +196,7 @@ class TestMultilinePatternWithMultilineExclude:
         """A multiline pattern match can be excluded based on following content."""
         # Pattern matches "?>\n" followed by any char (multiline match)
         # We exclude when the line after the match contains "<?php"
-        content = '?>\nX\n<?php\nother\n?>\nY\nnot_php\n'
+        content = "?>\nX\n<?php\nother\n?>\nY\nnot_php\n"
         path = _write_temp_file(content)
         try:
             rule_list = RuleList(
@@ -220,7 +220,7 @@ class TestMultilinePatternWithMultilineExclude:
 
     def test_all_multiline_matches_excluded(self) -> None:
         """When all multiline matches are excluded, check passes."""
-        content = '?>\nX\n<?php\n'
+        content = "?>\nX\n<?php\n"
         path = _write_temp_file(content)
         try:
             rule_list = RuleList(
