@@ -13,6 +13,7 @@ class Rule(TypedDict, total=False):
     exclude: AbstractSet[str]
     exclude_line: AbstractSet[Tuple[str, str]]
     exclude_pattern: str
+    exclude_pattern_context_lines: int
     good_lines: Sequence[str]
     include_only: AbstractSet[str]
     pattern: str
@@ -54,6 +55,29 @@ class RuleList:
 
         return rules_to_apply
 
+    def _get_exclude_context(
+        self,
+        contents: str,
+        line_starts: Sequence[int],
+        match_start_line: int,
+        match_end_line: int,
+        rule: Rule,
+    ) -> str:
+        """Return the text context to check exclude_pattern against.
+
+        By default (exclude_pattern_context_lines not set or 0), returns
+        just the matched lines. When exclude_pattern_context_lines is set
+        to N, extends the context to include N additional lines after the
+        match, enabling multiline exclusion patterns.
+        """
+        extra_lines = rule.get("exclude_pattern_context_lines", 0)
+        end_line = min(match_end_line + extra_lines, len(line_starts))
+        return contents[
+            line_starts[match_start_line] : line_starts[end_line]
+            if end_line < len(line_starts)
+            else None
+        ].strip()
+
     def check_file_for_pattern(
         self,
         fn: str,
@@ -92,7 +116,8 @@ class RuleList:
                 unmatched_exclude_lines.discard(lines_stripped)
                 continue
             if rule.get("exclude_pattern") and re.search(
-                rule["exclude_pattern"], lines_stripped
+                rule["exclude_pattern"],
+                self._get_exclude_context(contents, line_starts, i, j, rule),
             ):
                 continue
             self.print_error(rule, lines, identifier, color, fn, i + 1)

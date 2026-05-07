@@ -9,9 +9,9 @@ applications using a mix of third-party linters and custom rules.
 
 Modern full-stack web applications generally involve code written in
 several programming languages, each of which have their own standard
-linter tools.  For example, [Zulip](https://zulip.com) uses Python
+linter tools. For example, [Zulip](https://zulip.com) uses Python
 (mypy, Ruff), JavaScript (eslint), CSS (stylelint),
-puppet (puppet-lint), shell (shellcheck), and several more.  For many
+puppet (puppet-lint), shell (shellcheck), and several more. For many
 codebases, this results in linting being an unpleasantly slow
 experience, resulting in even more unpleasant secondary problems like
 developers merging code that doesn't pass lint, not enforcing linter
@@ -24,7 +24,7 @@ It has the following features:
 - Integrates with `git` to only checks files in source control (not
   automatically generated, untracked, or .gitignore files).
 - Runs the linters in parallel, so you only have to wait for the
-  slowest linter.  For Zulip, this is a ~4x performance improvement
+  slowest linter. For Zulip, this is a ~4x performance improvement
   over running our third-party linters in series.
 - Produduces easy-to-read, clear terminal output, with each
   independent linter given its own color.
@@ -37,11 +37,11 @@ It has the following features:
   - Integrate a third-party linter with just a couple lines of code.
   - Every feature supports convenient include/exclude rules.
   - Add custom lint rules with a powerful regular expression
-    framework.  E.g. in Zulip, we want all access to `Message` objects
+    framework. E.g. in Zulip, we want all access to `Message` objects
     in views code to be done via our `access_message_by_id` functions
     (which do security checks to ensure the user the request is being
     done on behalf of has access to the message), and that is enforced
-    in part by custom regular expression lint rules.  This system is
+    in part by custom regular expression lint rules. This system is
     optimized Python: Zulip has a few hundred custom linter rules of
     this type.
   - Easily add custom options to check subsets of your codebase,
@@ -50,7 +50,7 @@ It has the following features:
   can make sure your rules actually work.
 
 This codebase has been in production use in Zulip for several years,
-but only in 2019 was generalized for use by other projects.  Its API
+but only in 2019 was generalized for use by other projects. Its API
 to be beta and may change (with notice in the release notes) if we
 discover a better API, and patches to further extend it for more use
 cases are encouraged.
@@ -85,7 +85,6 @@ optional arguments:
   --verbose, -v         Print verbose output where available
   --fix                 Automatically fix problems where supported
 ```
-
 
 **Example Output**
 
@@ -146,7 +145,7 @@ pip install zulint
 ```
 
 We recommend starting by copying [example-lint](./example-lint) into
-your codebase and configuring it.  For a more advanced example, you
+your codebase and configuring it. For a more advanced example, you
 can look at [Zulip's
 linter](https://github.com/zulip/zulip/blob/master/tools/lint).
 
@@ -174,18 +173,18 @@ linter_config.external_linter('eslint', ['node', 'node_modules/.bin/eslint',
 
 The `external_linter` method takes the following arguments:
 
-* name: Name of the linter. It will be printer before the failed code to show
-        which linter is failing. | `REQUIRED`
-* command: The terminal command to execute your linter in "shell-like syntax".
-           You can use `shlex.split("SHELL COMMAND TO RUN LINTER")` to split your
-           command. | `REQUIRED`
-* target_langs: The language files this linter should run on. Leave this argument
-                empty (= `[]`) to run on all the files. | `RECOMMENDED`
-* pass_targets: Pass target files (aka files in the specified `target_langs`) to
-                the linter command when executing it. Default: `True` | `OPTIONAL`
-* fix_arg: Some linters support fixing the errors automatically. Set it to the flag
-           used by the linter to fix the errors. | `OPTIONAL`
-* description: The description of your linter to be printed with `--list` argument. | `RECOMMENDED`
+- name: Name of the linter. It will be printer before the failed code to show
+  which linter is failing. | `REQUIRED`
+- command: The terminal command to execute your linter in "shell-like syntax".
+  You can use `shlex.split("SHELL COMMAND TO RUN LINTER")` to split your
+  command. | `REQUIRED`
+- target_langs: The language files this linter should run on. Leave this argument
+  empty (= `[]`) to run on all the files. | `RECOMMENDED`
+- pass_targets: Pass target files (aka files in the specified `target_langs`) to
+  the linter command when executing it. Default: `True` | `OPTIONAL`
+- fix_arg: Some linters support fixing the errors automatically. Set it to the flag
+  used by the linter to fix the errors. | `OPTIONAL`
+- description: The description of your linter to be printed with `--list` argument. | `RECOMMENDED`
 
 eg:
 
@@ -244,6 +243,7 @@ def check_custom_rules():
 ```
 
 #### RuleList
+
 A new custom rule is defined via the `RuleList` class. `RuleList` takes the following arguments:
 
 ```python
@@ -258,6 +258,7 @@ exclude_max_length_line_patterns  # List of line patterns to exclude from max_le
 ```
 
 #### Rule
+
 A rule is a python dictionary containing regular expression,
 which will be run on each line in the `langs`' files specified in the `RuleList`.
 It has a lot of additional features which you can use to run the pattern in
@@ -273,6 +274,7 @@ Rule = TypedDict("Rule", {
     "exclude": Set[str],
     "exclude_line": Set[Tuple[str, str]],
     "exclude_pattern": str,
+    "exclude_pattern_context_lines": int,
     "good_lines": List[str],
     "include_only": Set[str],
     "pattern": str,
@@ -281,28 +283,52 @@ Rule = TypedDict("Rule", {
 }, total=False)
 ```
 
-* `pattern` is your regular expression to be run on all the eligible lines (i.e. lines which haven't been excluded by you).
-* `description` is the message that will be displayed if a pattern match is found.
-* `good_lines` are the list of sample lines which shouldn't match the pattern.
-* `bad_lines` are like `good_lines` but they match the pattern.
+- `pattern` is your regular expression to be run on all the eligible lines (i.e. lines which haven't been excluded by you).
+- `description` is the message that will be displayed if a pattern match is found.
+- `good_lines` are the list of sample lines which shouldn't match the pattern.
+- `bad_lines` are like `good_lines` but they match the pattern.
 
 **NOTE**: `patten` is run on `bad_lines` and `good_lines` and you can use them as an example to tell the developer
-      what is wrong with their code and how to fix it.
+what is wrong with their code and how to fix it.
 
-* `exclude` List of folders to exclude.
-* `exclude_line` Tuple of filename and pattern to exclude from pattern check.
-eg:
+- `exclude` List of folders to exclude.
+- `exclude_line` Tuple of filename and pattern to exclude from pattern check.
+  eg:
 
 ```python
 ('zerver/lib/actions.py', "user_profile.save()  # Can't use update_fields because of how the foreign key works.")`
 ```
 
-* `exclude_pattern`: pattern to exclude from the matching patterns.
-* `include_only`: `pattern` is only run on these files.
+- `exclude_pattern`: pattern to exclude from the matching patterns.
+- `exclude_pattern_context_lines`: integer specifying how many additional lines
+  after the match to include when evaluating `exclude_pattern`. This enables
+  multiline exclusion patterns that can inspect content beyond the matched lines.
+  Defaults to `0` (only matched lines are checked).
+- `include_only`: `pattern` is only run on these files.
+
+### Multiline exclude patterns
+
+When using a multiline `pattern` (e.g. `r'(\?>\n.)'`), you may want to exclude
+matches based on the content of subsequent lines. Use `exclude_pattern_context_lines`
+to extend the context that `exclude_pattern` can see:
+
+```python
+{
+    'pattern': r'\?>\n.',
+    'exclude_pattern': r'next_line_content_to_allow',
+    'exclude_pattern_context_lines': 1,
+    'description': 'Check PHP closing tags',
+}
+```
+
+In this example, `exclude_pattern` will see the matched lines **plus 1 additional
+line** after the match, allowing it to suppress the error when the next line matches
+the exclusion pattern.
 
 ## Development Setup
 
 Run the following commands in a terminal to install zulint.
+
 ```
 git clone git@github.com:zulip/zulint.git
 python3 -m venv zulint_env
